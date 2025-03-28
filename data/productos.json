@@ -1,0 +1,60 @@
+{
+    "productos": [
+        {
+            "id": 1,
+            "nombre": "Chocolate + frutos secos",
+            "precio": 117624,
+            "imagen": "./assets/img/box-choco-frutos",
+            "categoria": "box"
+        },
+        {
+            "id": 2,
+            "nombre": "Chocolate",
+            "precio": 67207,
+            "imagen": "./assets/img/box-chocolate",
+            "categoria": "box"
+        },
+        {
+            "id": 3,
+            "nombre": "Combo Box",  
+            "precio": 2503,
+            "imagen": "./assets/img/combo-box",
+            "categoria": "combos"
+        },
+        {
+            "id": 4,
+            "nombre": "Combo Box 2",
+            "precio": 5446,
+            "imagen": "./assets/img/combo-box2",
+            "categoria": "combos"
+        },
+        {
+            "id": 5,
+            "nombre": "Combo Box 3",
+            "precio": 54602,
+            "imagen": "./assets/img/combo-box3",
+            "categoria": "combos"
+        },
+        {
+            "id": 6,
+            "nombre": "Torta Glitter",
+            "precio": 67207,
+            "imagen": "./assets/img/torta-glitter",
+            "categoria": "torta"
+        },
+        {
+            "id": 7,
+            "nombre": "Torta Tematica",
+            "precio": 28211,
+            "imagen": "./assets/img/torta-tematica",
+            "categoria": "torta"
+        },
+        {
+            "id": 8,
+            "nombre": "Torta Pop It",
+            "precio": 12605,
+            "imagen": "./assets/img/torta-popit",
+            "categoria": "torta"
+        }
+    ]
+}
