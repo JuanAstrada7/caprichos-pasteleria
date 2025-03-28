@@ -1,4 +1,4 @@
-# Skull Riders Shop
+# Caprichos Pasteleria
 
 Tienda en línea de productos de pasteleria.
 
