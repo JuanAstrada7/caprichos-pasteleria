@@ -88,10 +88,11 @@ const agregarProducto = (idProducto) => {
 
         Swal.fire({
             position: "top-end",
+            toast: true,
             icon: "success",
             title: `Se agregó ${producto.nombre} al carrito`,
             showConfirmButton: false,
-            timer: 1500,
+            timer: 1000,
         });
     } catch (error) {
         Swal.fire({
