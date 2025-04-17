@@ -16,6 +16,20 @@ const filtrarPrecio = document.getElementById("filtroPorPrecio");
 let productosDisponibles;
 let carrito = JSON.parse(sessionStorage.getItem("carrito")) || [];
 
+// Función de utilidad para mostrar mensajes
+const mostrarMensaje = (opciones) => {
+    const configuracionBase = {
+        showConfirmButton: true,
+        timer: 3000,
+        position: "center"
+    };
+
+    return Swal.fire({
+        ...configuracionBase,
+        ...opciones
+    });
+};
+
 // Inicialización
 document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -28,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         dibujarCardProducto(productosDisponibles);
         dibujarCarrito();
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al inicializar",
             text: "Por favor, recarga la página",
@@ -57,7 +71,7 @@ const dibujarCardProducto = (productos) => {
             botonComprar.addEventListener("click", () => agregarProducto(id));
         });
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al mostrar productos",
             text: "Intenta recargar la página",
@@ -86,7 +100,7 @@ const agregarProducto = (idProducto) => {
         sessionStorage.setItem("carrito", JSON.stringify(carrito));
         dibujarCarrito();
 
-        Swal.fire({
+        mostrarMensaje({
             position: "top-end",
             toast: true,
             icon: "success",
@@ -95,7 +109,7 @@ const agregarProducto = (idProducto) => {
             timer: 1000,
         });
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al agregar producto",
             text: "Intenta nuevamente",
@@ -141,7 +155,7 @@ const dibujarCarrito = () => {
         });
         dibujarCarritoTotales();
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al mostrar carrito",
             text: "Intenta nuevamente",
@@ -165,7 +179,7 @@ const dibujarCarritoTotales = () => {
 
             const comprar = document.getElementById("hacerCompra");
             comprar.addEventListener("click", () => {
-                Swal.fire({
+                mostrarMensaje({
                     icon: "success",
                     title: "Compra realizada con éxito",
                     text: "Gracias por tu compra",
@@ -181,7 +195,7 @@ const dibujarCarritoTotales = () => {
             cantidadCarrito.innerHTML = `${calculaTotales().totalCantidad}`;
         }
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error en el carrito",
             text: "Intenta nuevamente",
@@ -210,7 +224,7 @@ const sumarProducto = (id) => {
         sessionStorage.setItem("carrito", JSON.stringify(carrito));
         dibujarCarrito();
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al actualizar cantidad",
             text: "Intenta nuevamente",
@@ -233,7 +247,7 @@ const restarProducto = (id) => {
         sessionStorage.setItem("carrito", JSON.stringify(carrito));
         dibujarCarrito();
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al actualizar cantidad",
             text: "Intenta nuevamente",
@@ -246,7 +260,7 @@ abrirCarrito.addEventListener("click", () => {
     try {
         modal.classList.add("modalMostrar");
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al abrir carrito",
             text: "Intenta nuevamente",
@@ -258,7 +272,7 @@ cerrarCarrito.addEventListener("click", () => {
     try {
         modal.classList.remove("modalMostrar");
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al cerrar carrito",
             text: "Intenta nuevamente",
@@ -280,7 +294,7 @@ filtroInput.addEventListener("keyup", (e) => {
             dibujarCardProducto(productosDisponibles);
         }
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al filtrar productos",
             text: "Intenta nuevamente",
@@ -302,7 +316,7 @@ listaMenu.addEventListener("click", (e) => {
             dibujarCardProducto(productoFiltrado);
         }
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al filtrar categoría",
             text: "Intenta nuevamente",
@@ -323,7 +337,7 @@ filtrarPrecio.addEventListener("click", (e) => {
 
         dibujarCardProducto(productos);
     } catch (error) {
-        Swal.fire({
+        mostrarMensaje({
             icon: "error",
             title: "Error al ordenar productos",
             text: "Intenta nuevamente",

@@ -1,3 +1,12 @@
+// Función para mostrar mensajes
+function mostrarMensaje(tipo, titulo, texto) {
+    Swal.fire({
+        icon: tipo,
+        title: titulo,
+        text: texto
+    });
+}
+
 // Función para cargar productos desde el JSON
 async function obtenerProductos() {
     try {
@@ -9,11 +18,8 @@ async function obtenerProductos() {
         localStorage.setItem("productos", JSON.stringify(data.productos));
         return data.productos;
     } catch (error) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error al cargar productos',
-            text: 'Usando datos de respaldo'
-        });
+        mostrarMensaje('error', 'Error al cargar productos', 'Usando datos de respaldo');
+        
         // Si hay error al cargar el JSON, usar datos de respaldo
         const productosRespaldo = [
             {
@@ -78,4 +84,4 @@ async function obtenerProductos() {
     }
 }
 
-export { obtenerProductos };
+export { obtenerProductos, mostrarMensaje };
