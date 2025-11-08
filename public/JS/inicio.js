@@ -1,4 +1,4 @@
-import { obtenerProductos } from './productos.js';
+import { obtenerProductos, mostrarMensaje } from './productos.js';
 
 // Elementos del DOM
 const divProductos = document.getElementById("productos");
@@ -13,40 +13,24 @@ const listaMenu = document.getElementById("filtroLista");
 const filtrarPrecio = document.getElementById("filtroPorPrecio");
 
 // Variables globales
-let productosDisponibles;
+let productosDisponibles = [];
+let todosLosProductos = [];
 let carrito = JSON.parse(sessionStorage.getItem("carrito")) || [];
-
-// Función de utilidad para mostrar mensajes
-const mostrarMensaje = (opciones) => {
-    const configuracionBase = {
-        showConfirmButton: true,
-        timer: 3000,
-        position: "center"
-    };
-
-    return Swal.fire({
-        ...configuracionBase,
-        ...opciones
-    });
-};
 
 // Inicialización
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        productosDisponibles = JSON.parse(localStorage.getItem("productos"));
-        
-        if (!productosDisponibles) {
-            productosDisponibles = await obtenerProductos();
-        }
-        
+        todosLosProductos = await obtenerProductos();
+        productosDisponibles = [...todosLosProductos];
+
         dibujarCardProducto(productosDisponibles);
         dibujarCarrito();
     } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al inicializar",
-            text: "Por favor, recarga la página",
-        });
+        mostrarMensaje(
+            "error",
+            "Error al inicializar",
+            "Por favor, recarga la página"
+        );
     }
 });
 
@@ -71,49 +55,45 @@ const dibujarCardProducto = (productos) => {
             botonComprar.addEventListener("click", () => agregarProducto(id));
         });
     } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al mostrar productos",
-            text: "Intenta recargar la página",
-        });
+        mostrarMensaje(
+            "error",
+            "Error al mostrar productos",
+            "Intenta recargar la página"
+        );
     }
 };
 
 const agregarProducto = (idProducto) => {
     try {
-        const producto = productosDisponibles.find(
+        const producto = todosLosProductos.find(
             (producto) => producto.id === idProducto
-        );
-        if (!producto) throw new Error('Producto no encontrado');
+        ); if (!producto) throw new Error('Producto no encontrado');
 
         const productoEnCarrito = carrito.find(
             (item) => item.id === idProducto
         );
 
         if (!productoEnCarrito) {
-            carrito.push({...producto, cantidad: 1});
+            carrito.push({ ...producto, cantidad: 1, precioTotal: producto.precio });
         } else {
             productoEnCarrito.cantidad++;
-            productoEnCarrito.precio = producto.precio * productoEnCarrito.cantidad;
+            productoEnCarrito.precioTotal = producto.precio * productoEnCarrito.cantidad;
         }
 
         sessionStorage.setItem("carrito", JSON.stringify(carrito));
         dibujarCarrito();
 
-        mostrarMensaje({
-            position: "top-end",
-            toast: true,
-            icon: "success",
-            title: `Se agregó ${producto.nombre} al carrito`,
-            showConfirmButton: false,
-            timer: 1000,
-        });
+        mostrarMensaje(
+            "success",
+            `Se agregó ${producto.nombre} al carrito`,
+            ""
+        );
     } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al agregar producto",
-            text: "Intenta nuevamente",
-        });
+        mostrarMensaje(
+            "error",
+            "Error al agregar producto",
+            "Intenta nuevamente"
+        );
     }
 };
 
@@ -121,14 +101,14 @@ const dibujarCarrito = () => {
     try {
         divCarrito.innerHTML = "";
         carrito.forEach((producto) => {
-            const { imagen, nombre, precio, id, cantidad } = producto;
+            const { imagen, nombre, precio, id, cantidad, precioTotal } = producto;
             const cardCarrito = document.createElement("div");
             cardCarrito.className = "cardCarrito";
             cardCarrito.innerHTML = `
                 <img class="cardImg" src="${imagen}" alt="${nombre}">
                 <div class="cardInfo">
                     <h5 class="nombreProducto">${nombre}</h5>
-                    <p class="cardPrecio">Precio unitario: $${precio / cantidad}</p>
+                    <p class="cardPrecio">Precio unitario: $${precio}</p>
                     <div class="cardCarritoBotones">
                         <button class="cardCarritoSumar" id="botonSumar${id}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
@@ -142,7 +122,7 @@ const dibujarCarrito = () => {
                             </svg>
                         </button>
                     </div>
-                    <p class="cardPrecio">Precio Total: $${precio}</p>
+                    <p class="cardPrecio">Precio Total: $${precioTotal}</p>
                 </div>
             `;
             divCarrito.append(cardCarrito);
@@ -155,11 +135,11 @@ const dibujarCarrito = () => {
         });
         dibujarCarritoTotales();
     } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al mostrar carrito",
-            text: "Intenta nuevamente",
-        });
+        mostrarMensaje(
+            "error",
+            "Error al mostrar carrito",
+            "Intenta nuevamente"
+        );
     }
 };
 
@@ -179,13 +159,11 @@ const dibujarCarritoTotales = () => {
 
             const comprar = document.getElementById("hacerCompra");
             comprar.addEventListener("click", () => {
-                mostrarMensaje({
-                    icon: "success",
-                    title: "Compra realizada con éxito",
-                    text: "Gracias por tu compra",
-                    showConfirmButton: false,
-                    timer: 2000,
-                });
+                mostrarMensaje(
+                    "success",
+                    "Compra realizada con éxito",
+                    "Gracias por tu compra"
+                );
                 carrito = [];
                 sessionStorage.setItem("carrito", JSON.stringify(carrito));
                 dibujarCarrito();
@@ -195,50 +173,44 @@ const dibujarCarritoTotales = () => {
             cantidadCarrito.innerHTML = `${calculaTotales().totalCantidad}`;
         }
     } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error en el carrito",
-            text: "Intenta nuevamente",
-        });
+        mostrarMensaje(
+            "error",
+            "Error en el carrito",
+            "Intenta nuevamente"
+        );
     }
 };
 
 const calculaTotales = () => {
-    try {
-        const totalPagar = carrito.reduce((total, { precio }) => total + precio, 0);
-        const totalCantidad = carrito.reduce((total, { cantidad }) => total + cantidad, 0);
-        return { totalPagar, totalCantidad };
-    } catch (error) {
-        return { totalPagar: 0, totalCantidad: 0 };
-    }
+    const totalPagar = carrito.reduce((total, { precioTotal }) => total + precioTotal, 0);
+    const totalCantidad = carrito.reduce((total, { cantidad }) => total + cantidad, 0);
+    return { totalPagar, totalCantidad };
 };
 
 const sumarProducto = (id) => {
     try {
         const indexCarrito = carrito.findIndex((producto) => producto.id === id);
-        const precio = carrito[indexCarrito].precio / carrito[indexCarrito].cantidad;
-
         carrito[indexCarrito].cantidad++;
-        carrito[indexCarrito].precio = precio * carrito[indexCarrito].cantidad;
+        carrito[indexCarrito].precioTotal = productoOriginal.precio * carrito[indexCarrito].cantidad;
 
         sessionStorage.setItem("carrito", JSON.stringify(carrito));
         dibujarCarrito();
     } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al actualizar cantidad",
-            text: "Intenta nuevamente",
-        });
+        mostrarMensaje(
+            "error",
+            "Error al actualizar cantidad",
+            "Intenta nuevamente"
+        );
     }
 };
 
 const restarProducto = (id) => {
     try {
         const indexCarrito = carrito.findIndex((producto) => producto.id === id);
-        const precio = carrito[indexCarrito].precio / carrito[indexCarrito].cantidad;
+        const productoOriginal = todosLosProductos.find(p => p.id === id);
 
         carrito[indexCarrito].cantidad--;
-        carrito[indexCarrito].precio = precio * carrito[indexCarrito].cantidad;
+        carrito[indexCarrito].precioTotal = productoOriginal.precio * carrito[indexCarrito].cantidad;
 
         if (carrito[indexCarrito].cantidad === 0) {
             carrito.splice(indexCarrito, 1);
@@ -247,100 +219,97 @@ const restarProducto = (id) => {
         sessionStorage.setItem("carrito", JSON.stringify(carrito));
         dibujarCarrito();
     } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al actualizar cantidad",
-            text: "Intenta nuevamente",
+        mostrarMensaje(
+            "error",
+            "Error al actualizar cantidad",
+            "Intenta nuevamente"
+        );
+
+        // Event Listeners
+        abrirCarrito.addEventListener("click", () => {
+            try {
+                modal.classList.add("modalMostrar");
+            } catch (error) {
+                mostrarMensaje(
+                    "error",
+                    "Error al abrir carrito",
+                    "Intenta nuevamente"
+                );
+            }
+        });
+
+        cerrarCarrito.addEventListener("click", () => {
+            try {
+                modal.classList.remove("modalMostrar");
+            } catch (error) {
+                mostrarMensaje(
+                    "error",
+                    "Error al cerrar carrito",
+                    "Intenta nuevamente"
+                );
+            }
+        });
+
+        filtroInput.addEventListener("keyup", (e) => {
+            try {
+                const searchText = e.target.value.toLowerCase();
+                if (searchText.trim() !== "") {
+                    productosDisponibles = todosLosProductos.filter((producto) =>
+                        producto.nombre.toLowerCase().includes(searchText)
+                    );
+                } else {
+                    productosDisponibles = [...todosLosProductos];
+                }
+                dibujarCardProducto(productosDisponibles);
+            } catch (error) {
+                mostrarMensaje(
+                    "error",
+                    "Error al filtrar productos",
+                    "Intenta nuevamente"
+                );
+            }
+        });
+
+        listaMenu.addEventListener("click", (e) => {
+            try {
+                filtroInput.value = "";
+                const filtroCategoria = e.target.innerHTML.toLowerCase();
+
+                if (filtroCategoria === "todos los productos") {
+                    productosDisponibles = [...todosLosProductos];
+                } else {
+                    productosDisponibles = todosLosProductos.filter((producto) =>
+                        producto.categoria.toLowerCase() === filtroCategoria
+                    );
+                }
+                dibujarCardProducto(productosDisponibles);
+            } catch (error) {
+                mostrarMensaje(
+                    "error",
+                    "Error al filtrar categoría",
+                    "Intenta nuevamente"
+                );
+            }
+        });
+
+        filtrarPrecio.addEventListener("click", (e) => {
+            try {
+                const orden = e.target.innerHTML;
+
+                if (orden === "Ascendente") {
+                    productosDisponibles.sort((a, b) => a.precio - b.precio);
+                } else if (orden === "Descendente") {
+                    productosDisponibles.sort((a, b) => b.precio - a.precio);
+                }
+
+                dibujarCardProducto(productosDisponibles);
+            } catch (error) {
+                mostrarMensaje(
+                    "error",
+                    "Error al ordenar productos",
+                    "Intenta nuevamente"
+                );
+            }
         });
     }
 };
-
-// Event Listeners
-abrirCarrito.addEventListener("click", () => {
-    try {
-        modal.classList.add("modalMostrar");
-    } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al abrir carrito",
-            text: "Intenta nuevamente",
-        });
-    }
-});
-
-cerrarCarrito.addEventListener("click", () => {
-    try {
-        modal.classList.remove("modalMostrar");
-    } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al cerrar carrito",
-            text: "Intenta nuevamente",
-        });
-    }
-});
-
-filtroInput.addEventListener("keyup", (e) => {
-    try {
-        const productoFiltrado = productosDisponibles.filter((producto) =>
-            producto.nombre.toLowerCase().includes(e.target.value.toLowerCase())
-        );
-
-        if (e.target.value !== "") {
-            productosDisponibles = productoFiltrado;
-            dibujarCardProducto(productoFiltrado);
-        } else {
-            productosDisponibles = JSON.parse(localStorage.getItem("productos"));
-            dibujarCardProducto(productosDisponibles);
-        }
-    } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al filtrar productos",
-            text: "Intenta nuevamente",
-        });
-    }
-});
-
-listaMenu.addEventListener("click", (e) => {
-    try {
-        const filtroCategoria = e.target.innerHTML.toLowerCase();
-
-        if (filtroCategoria === "todos los productos") {
-            productosDisponibles = JSON.parse(localStorage.getItem("productos"));
-            dibujarCardProducto(productosDisponibles);
-        } else {
-            const productoFiltrado = productosDisponibles.filter((producto) =>
-                producto.categoria.toLowerCase().includes(filtroCategoria)
-            );
-            dibujarCardProducto(productoFiltrado);
-        }
-    } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al filtrar categoría",
-            text: "Intenta nuevamente",
-        });
-    }
-});
-
-filtrarPrecio.addEventListener("click", (e) => {
-    try {
-        const orden = e.target.innerHTML;
-        let productos;
-
-        if (orden === "Ascendente") {
-            productos = productosDisponibles.sort((a, b) => a.precio - b.precio);
-        } else if (orden === "Descendente") {
-            productos = productosDisponibles.sort((a, b) => b.precio - a.precio);
-        }
-
-        dibujarCardProducto(productos);
-    } catch (error) {
-        mostrarMensaje({
-            icon: "error",
-            title: "Error al ordenar productos",
-            text: "Intenta nuevamente",
-        });
-    }
-});
