@@ -190,6 +190,7 @@ const calculaTotales = () => {
 const sumarProducto = (id) => {
     try {
         const indexCarrito = carrito.findIndex((producto) => producto.id === id);
+        const productoOriginal = todosLosProductos.find(p => p.id === id);
         carrito[indexCarrito].cantidad++;
         carrito[indexCarrito].precioTotal = productoOriginal.precio * carrito[indexCarrito].cantidad;
 
@@ -224,92 +225,92 @@ const restarProducto = (id) => {
             "Error al actualizar cantidad",
             "Intenta nuevamente"
         );
-
-        // Event Listeners
-        abrirCarrito.addEventListener("click", () => {
-            try {
-                modal.classList.add("modalMostrar");
-            } catch (error) {
-                mostrarMensaje(
-                    "error",
-                    "Error al abrir carrito",
-                    "Intenta nuevamente"
-                );
-            }
-        });
-
-        cerrarCarrito.addEventListener("click", () => {
-            try {
-                modal.classList.remove("modalMostrar");
-            } catch (error) {
-                mostrarMensaje(
-                    "error",
-                    "Error al cerrar carrito",
-                    "Intenta nuevamente"
-                );
-            }
-        });
-
-        filtroInput.addEventListener("keyup", (e) => {
-            try {
-                const searchText = e.target.value.toLowerCase();
-                if (searchText.trim() !== "") {
-                    productosDisponibles = todosLosProductos.filter((producto) =>
-                        producto.nombre.toLowerCase().includes(searchText)
-                    );
-                } else {
-                    productosDisponibles = [...todosLosProductos];
-                }
-                dibujarCardProducto(productosDisponibles);
-            } catch (error) {
-                mostrarMensaje(
-                    "error",
-                    "Error al filtrar productos",
-                    "Intenta nuevamente"
-                );
-            }
-        });
-
-        listaMenu.addEventListener("click", (e) => {
-            try {
-                filtroInput.value = "";
-                const filtroCategoria = e.target.innerHTML.toLowerCase();
-
-                if (filtroCategoria === "todos los productos") {
-                    productosDisponibles = [...todosLosProductos];
-                } else {
-                    productosDisponibles = todosLosProductos.filter((producto) =>
-                        producto.categoria.toLowerCase() === filtroCategoria
-                    );
-                }
-                dibujarCardProducto(productosDisponibles);
-            } catch (error) {
-                mostrarMensaje(
-                    "error",
-                    "Error al filtrar categoría",
-                    "Intenta nuevamente"
-                );
-            }
-        });
-
-        filtrarPrecio.addEventListener("click", (e) => {
-            try {
-                const orden = e.target.innerHTML;
-
-                if (orden === "Ascendente") {
-                    productosDisponibles.sort((a, b) => a.precio - b.precio);
-                } else if (orden === "Descendente") {
-                    productosDisponibles.sort((a, b) => b.precio - a.precio);
-                }
-
-                dibujarCardProducto(productosDisponibles);
-            } catch (error) {
-                mostrarMensaje(
-                    "error",
-                    "Error al ordenar productos",
-                    "Intenta nuevamente"
-                );
-            }
-        });
     }
 };
+
+// Event Listeners
+abrirCarrito.addEventListener("click", () => {
+    try {
+        modal.classList.add("modalMostrar");
+    } catch (error) {
+        mostrarMensaje(
+            "error",
+            "Error al abrir carrito",
+            "Intenta nuevamente"
+        );
+    }
+});
+
+cerrarCarrito.addEventListener("click", () => {
+    try {
+        modal.classList.remove("modalMostrar");
+    } catch (error) {
+        mostrarMensaje(
+            "error",
+            "Error al cerrar carrito",
+            "Intenta nuevamente"
+        );
+    }
+});
+
+filtroInput.addEventListener("keyup", (e) => {
+    try {
+        const searchText = e.target.value.toLowerCase();
+        if (searchText.trim() !== "") {
+            productosDisponibles = todosLosProductos.filter((producto) =>
+                producto.nombre.toLowerCase().includes(searchText)
+            );
+        } else {
+            productosDisponibles = [...todosLosProductos];
+        }
+        dibujarCardProducto(productosDisponibles);
+    } catch (error) {
+        mostrarMensaje(
+            "error",
+            "Error al filtrar productos",
+            "Intenta nuevamente"
+        );
+    }
+});
+
+listaMenu.addEventListener("click", (e) => {
+    try {
+        filtroInput.value = "";
+        const filtroCategoria = e.target.innerHTML.toLowerCase();
+
+        if (filtroCategoria === "todos los productos") {
+            productosDisponibles = [...todosLosProductos];
+        } else {
+            productosDisponibles = todosLosProductos.filter((producto) =>
+                producto.categoria.toLowerCase() === filtroCategoria
+            );
+        }
+        dibujarCardProducto(productosDisponibles);
+    } catch (error) {
+        mostrarMensaje(
+            "error",
+            "Error al filtrar categoría",
+            "Intenta nuevamente"
+        );
+    }
+});
+
+filtrarPrecio.addEventListener("click", (e) => {
+    try {
+        const orden = e.target.innerHTML;
+
+        if (orden === "Ascendente") {
+            productosDisponibles.sort((a, b) => a.precio - b.precio);
+        } else if (orden === "Descendente") {
+            productosDisponibles.sort((a, b) => b.precio - a.precio);
+        }
+
+        dibujarCardProducto(productosDisponibles);
+    } catch (error) {
+        mostrarMensaje(
+            "error",
+            "Error al ordenar productos",
+            "Intenta nuevamente"
+        );
+    }
+});

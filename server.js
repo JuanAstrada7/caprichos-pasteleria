@@ -1,15 +1,11 @@
-try {
-    require('dotenv').config();
-} catch (e) {
-    console.warn('dotenv module not found. Please ensure it is installed or set environment variables manually.');
-}
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const PRODUCTS_PATH = path.join(__dirname, 'data', 'productos.json');
 
 // Middleware
@@ -49,7 +45,7 @@ app.post('/api/productos', (req, res) => {
 // Admin login
 app.post('/api/login', (req, res) => {
     const { password } = req.body;
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminPassword = process.env.ADMIN_PASSWORD; // No hardcoded fallback
 
     if (password === adminPassword) {
         res.json({ success: true });
