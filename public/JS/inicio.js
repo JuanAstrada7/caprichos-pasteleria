@@ -19,7 +19,7 @@ try {
     if (carritoData) {
         const { carritoGuardado, timestamp } = JSON.parse(carritoData);
         const ahora = new Date().getTime();
-        const unaSemanaEnMilisegundos = 7 * 24 * 60 * 60 * 1000; // 7 días
+        const unaSemanaEnMilisegundos = 7 * 24 * 60 * 60 * 1000;
 
         if (ahora - timestamp < unaSemanaEnMilisegundos) {
             carrito = carritoGuardado;
@@ -152,11 +152,11 @@ const guardarCarritoEnStorage = () => {
 const agregarProducto = (idProducto) => {
     try {
         const producto = todosLosProductos.find(
-            (producto) => producto.id === idProducto
+            (producto) => String(producto.id) === String(idProducto)
         ); if (!producto) throw new Error('Producto no encontrado');
 
         const productoEnCarrito = carrito.find(
-            (item) => item.id === idProducto
+            (item) => String(item.id) === String(idProducto)
         );
 
         if (!productoEnCarrito) {
@@ -276,8 +276,8 @@ const calculaTotales = () => {
 
 const sumarProducto = (id) => {
     try {
-        const indexCarrito = carrito.findIndex((producto) => producto.id === id);
-        const productoOriginal = todosLosProductos.find(p => p.id === id);
+        const indexCarrito = carrito.findIndex((producto) => String(producto.id) === String(id));
+        const productoOriginal = todosLosProductos.find(p => String(p.id) === String(id));
         carrito[indexCarrito].cantidad++;
         carrito[indexCarrito].precioTotal = productoOriginal.precio * carrito[indexCarrito].cantidad;
 
@@ -294,8 +294,8 @@ const sumarProducto = (id) => {
 
 const restarProducto = (id) => {
     try {
-        const indexCarrito = carrito.findIndex((producto) => producto.id === id);
-        const productoOriginal = todosLosProductos.find(p => p.id === id);
+        const indexCarrito = carrito.findIndex((producto) => String(producto.id) === String(id));
+        const productoOriginal = todosLosProductos.find(p => String(p.id) === String(id));
 
         carrito[indexCarrito].cantidad--;
         carrito[indexCarrito].precioTotal = productoOriginal.precio * carrito[indexCarrito].cantidad;
@@ -317,7 +317,7 @@ const restarProducto = (id) => {
 
 const eliminarProductoDelCarrito = (id) => {
     try {
-        const indexCarrito = carrito.findIndex((producto) => producto.id === id);
+        const indexCarrito = carrito.findIndex((producto) => String(producto.id) === String(id));
         if (indexCarrito === -1) return;
 
         carrito.splice(indexCarrito, 1);

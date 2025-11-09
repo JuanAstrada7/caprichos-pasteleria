@@ -165,16 +165,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleDeleteProduct = async (id) => {
-        if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-            try {
-                const result = await api.deleteProduct(id);
-                allProducts = result.productos;
-                renderProducts();
-                mostrarMensaje('success', 'Producto eliminado', 'El producto y su imagen han sido eliminados.');
-            } catch (error) {
-                mostrarMensaje('error', 'Error al eliminar', error.message);
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esta acción no se puede revertir.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, ¡eliminar!',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const apiResult = await api.deleteProduct(id);
+                    allProducts = apiResult.productos;
+                    renderProducts();
+                    mostrarMensaje('success', 'Producto eliminado', 'El producto y su imagen han sido eliminados.');
+                } catch (error) {
+                    mostrarMensaje('error', 'Error al eliminar', error.message);
+                }
             }
-        }
+        });
     };
 
     loginForm.addEventListener('submit', async (e) => {
@@ -208,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = target.closest('.card');
         if (!card) return;
 
-        const productId = Number(card.dataset.productId);
+        const productId = card.dataset.productId;
 
         if (target.classList.contains('edit-btn')) {
             activeModalTrigger = target;
@@ -236,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (imageFile) {
                 formData.append('imagen', imageFile);
             } else if (isEditing) {
-                const product = allProducts.find(p => p.id === Number(productId));
+                const product = allProducts.find(p => p.id === productId);
                 formData.append('imagenAnterior', product.imagen);
             } else {
                 throw new Error('Debes seleccionar una imagen para el nuevo producto.');

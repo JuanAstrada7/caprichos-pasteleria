@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
@@ -99,7 +100,7 @@ app.post('/api/producto', requireAdmin, upload.single('imagen'), async (req, res
     }
 
     if (isEditing) {
-        const productId = Number(id);
+        const productId = id;
         if (!imagenAnterior) {
             const originalProduct = productsCache.find(p => p.id === productId);
             if (originalProduct && originalProduct.imagen.startsWith('/uploads/')) {
@@ -110,7 +111,7 @@ app.post('/api/producto', requireAdmin, upload.single('imagen'), async (req, res
         productsCache = productsCache.map(p => p.id === productId ? { ...p, nombre, precio: Number(precio), categoria, imagen: imageUrl } : p);
     } else {
         const newProductData = {
-            id: Date.now(),
+            id: crypto.randomUUID(),
             nombre,
             precio: Number(precio),
             categoria,
@@ -133,9 +134,8 @@ app.post('/api/producto', requireAdmin, upload.single('imagen'), async (req, res
 
 app.delete('/api/producto/:id', requireAdmin, (req, res) => {
     const { id } = req.params;
-    const productId = Number(id);
 
-    const productToDelete = productsCache.find(p => p.id === productId);
+    const productToDelete = productsCache.find(p => p.id === id);
 
     if (!productToDelete) {
         return res.status(404).json({ message: 'Producto no encontrado.' });
@@ -149,7 +149,7 @@ app.delete('/api/producto/:id', requireAdmin, (req, res) => {
         }
     }
 
-    productsCache = productsCache.filter(p => p.id !== productId);
+    productsCache = productsCache.filter(p => p.id !== id);
 
     fs.writeFile(PRODUCTS_PATH, JSON.stringify(productsCache, null, 2), 'utf8', (err) => {
         if (err) return res.status(500).json({ message: 'Error al escribir en el archivo de productos.' });
