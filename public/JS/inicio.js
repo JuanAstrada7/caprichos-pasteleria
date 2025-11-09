@@ -15,11 +15,22 @@ let productosDisponibles = [];
 let todosLosProductos = [];
 let carrito = [];
 try {
-    const carritoGuardado = localStorage.getItem("carrito");
-    carrito = carritoGuardado ? JSON.parse(carritoGuardado) : [];
+    const carritoData = localStorage.getItem("carritoData");
+    if (carritoData) {
+        const { carritoGuardado, timestamp } = JSON.parse(carritoData);
+        const ahora = new Date().getTime();
+        const unaSemanaEnMilisegundos = 7 * 24 * 60 * 60 * 1000; // 7 días
+
+        if (ahora - timestamp < unaSemanaEnMilisegundos) {
+            carrito = carritoGuardado;
+        } else {
+            localStorage.removeItem("carritoData");
+            carrito = [];
+        }
+    }
 } catch (error) {
     console.error("Error al parsear el carrito desde localStorage:", error);
-    carrito = []; // Inicia con un carrito vacío si hay un error
+    carrito = [];
 }
 
 const filtros = {
@@ -106,6 +117,14 @@ const dibujarCardProducto = (productos) => {
     }
 };
 
+const guardarCarritoEnStorage = () => {
+    const carritoData = {
+        carritoGuardado: carrito,
+        timestamp: new Date().getTime()
+    };
+    localStorage.setItem("carritoData", JSON.stringify(carritoData));
+};
+
 const agregarProducto = (idProducto) => {
     try {
         const producto = todosLosProductos.find(
@@ -123,7 +142,7 @@ const agregarProducto = (idProducto) => {
             productoEnCarrito.precioTotal = producto.precio * productoEnCarrito.cantidad;
         }
 
-        localStorage.setItem("carrito", JSON.stringify(carrito));
+        guardarCarritoEnStorage();
         dibujarCarrito();
 
         mostrarMensaje(
@@ -234,7 +253,7 @@ const sumarProducto = (id) => {
         carrito[indexCarrito].cantidad++;
         carrito[indexCarrito].precioTotal = productoOriginal.precio * carrito[indexCarrito].cantidad;
 
-        localStorage.setItem("carrito", JSON.stringify(carrito));
+        guardarCarritoEnStorage();
         dibujarCarrito();
     } catch (error) {
         mostrarMensaje(
@@ -257,7 +276,7 @@ const restarProducto = (id) => {
             carrito.splice(indexCarrito, 1);
         }
 
-        localStorage.setItem("carrito", JSON.stringify(carrito));
+        guardarCarritoEnStorage();
         dibujarCarrito();
     } catch (error) {
         mostrarMensaje(
@@ -275,7 +294,7 @@ const eliminarProductoDelCarrito = (id) => {
 
         carrito.splice(indexCarrito, 1);
 
-        localStorage.setItem("carrito", JSON.stringify(carrito));
+        guardarCarritoEnStorage();
         dibujarCarrito();
     } catch (error) {
         mostrarMensaje(
@@ -295,7 +314,7 @@ const vaciarCarrito = () => {
     ).then((result) => {
         if (result.isConfirmed) {
             carrito = [];
-            localStorage.setItem("carrito", JSON.stringify(carrito));
+            guardarCarritoEnStorage();
             dibujarCarrito();
             mostrarMensaje('success', '¡Carrito vacío!', 'Se han eliminado todos los productos.');
         }
@@ -347,7 +366,7 @@ const enviarPedidoWhatsApp = (e) => {
 
     checkoutModal.hide();
     carrito = [];
-    localStorage.setItem("carrito", JSON.stringify(carrito));
+    guardarCarritoEnStorage();
     dibujarCarrito();
 
     mostrarMensaje(
