@@ -5,6 +5,7 @@ const fs = require('fs');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
+const session = require('express-session');
 const sharp = require('sharp');
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +31,22 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'un-secreto-muy-seguro-por-defecto',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000
+    }
+}));
+
+const requireAdmin = (req, res, next) => {
+    if (!req.session.isAdmin) return res.status(401).json({ message: 'Acceso no autorizado. Debes iniciar sesión.' });
+    next();
+};
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -46,7 +63,7 @@ app.get('/api/productos', (req, res) => {
     res.json({ productos: productsCache });
 });
 
-app.post('/api/producto', upload.single('imagen'), async (req, res) => {
+app.post('/api/producto', requireAdmin, upload.single('imagen'), async (req, res) => {
     const { id, nombre, precio, categoria, imagenAnterior } = req.body;
 
     if (!nombre || !precio || !categoria) {
@@ -114,7 +131,7 @@ app.post('/api/producto', upload.single('imagen'), async (req, res) => {
     });
 });
 
-app.delete('/api/producto/:id', (req, res) => {
+app.delete('/api/producto/:id', requireAdmin, (req, res) => {
     const { id } = req.params;
     const productId = Number(id);
 
@@ -150,12 +167,22 @@ app.post('/api/login', async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, adminPasswordHash);
     if (isMatch) {
+        req.session.isAdmin = true;
         res.json({ success: true });
     } else {
         res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
     }
 });
 
+app.post('/api/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).json({ message: 'No se pudo cerrar la sesión.' });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ success: true, message: 'Sesión cerrada correctamente.' });
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);

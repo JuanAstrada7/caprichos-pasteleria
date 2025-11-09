@@ -250,6 +250,10 @@ const dibujarCarritoTotales = () => {
             `;
 
             carritoTotales.append(totales);
+
+            document.getElementById('finalizarCompraBtn').addEventListener('click', handleCheckout);
+            document.getElementById('vaciarCarritoBtn').addEventListener('click', vaciarCarrito);
+
             cantidadCarrito.innerHTML = `${calculaTotales().totalCantidad}`;
         } else {
             carritoTotales.innerHTML = `<h4>"Agrega productos para comprar"</h4>`;
@@ -425,14 +429,6 @@ cerrarCarrito.addEventListener("click", () => {
             "Error al cerrar carrito",
             "Intenta nuevamente"
         );
-    }
-});
-
-document.body.addEventListener('click', (e) => {
-    if (e.target.id === 'finalizarCompraBtn') {
-        handleCheckout();
-    } else if (e.target.id === 'vaciarCarritoBtn') {
-        vaciarCarrito();
     }
 });
 

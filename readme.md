@@ -20,6 +20,7 @@ Sitio web para Caprichos Pastelería que permite a los usuarios explorar y compr
 - **Multer**: Para la gestión de subida de archivos (imágenes de productos).
 - **Sharp**: Para el procesamiento y optimización de imágenes en tiempo real (conversión a `.webp` y redimensionado).
 - **dotenv**: Para la gestión de variables de entorno.
+- **express-session**: Para manejar sesiones de administrador seguras.
 
 ## ✨ Características
 
@@ -75,10 +76,15 @@ Juan Astrada
       ```bash
       node hash-generator.js
       ```
-    - Copia el hash generado y agrégalo a tu archivo `.env` junto con el puerto:
+    - Genera un secreto para la sesión ejecutando este comando en tu terminal:
+      ```bash
+      node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+      ```
+    - Copia los valores generados y agrégalos a tu archivo `.env`:
       ```
       ADMIN_PASSWORD_HASH=tu_hash_seguro_aqui
       PORT=3000
+      SESSION_SECRET=tu_secreto_de_sesion_aqui
       ```
 
 4.  **Iniciar el servidor:**
@@ -87,4 +93,3 @@ Juan Astrada
     ```
 
 5.  Abre tu navegador y visita `http://localhost:3000` para ver la tienda o `http://localhost:3000/admin` para acceder al panel de administración.
-

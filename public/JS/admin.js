@@ -36,7 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 body: formData,
             });
-            if (!response.ok) throw new Error('Error al guardar el producto');
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '/admin'; // Redirige al login si la sesión expiró
+                }
+                throw new Error('Error al guardar el producto');
+            }
             return response.json();
         },
         deleteProduct: async (id) => {
@@ -44,6 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'DELETE',
             });
             if (!response.ok) throw new Error('Error al eliminar el producto');
+            return response.json();
+        },
+        logout: async () => {
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+            });
+            if (!response.ok) throw new Error('Error al cerrar sesión');
+            sessionStorage.removeItem('isAdminLoggedIn');
             return response.json();
         }
     };
@@ -55,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const showLogin = () => {
-        sessionStorage.removeItem('isAdminLoggedIn');
         loginContainer.classList.remove('d-none');
         adminPanel.classList.add('d-none');
         passwordInput.value = '';
@@ -177,7 +189,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    logoutButton.addEventListener('click', showLogin);
+    logoutButton.addEventListener('click', async () => {
+        try {
+            await api.logout();
+            showLogin();
+        } catch (error) {
+            mostrarMensaje('error', 'Error', 'No se pudo cerrar la sesión en el servidor.');
+        }
+    });
 
     addProductBtn.addEventListener('click', (e) => {
         activeModalTrigger = e.currentTarget;
