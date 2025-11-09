@@ -13,7 +13,14 @@ const filtrarPrecio = document.getElementById("filtroPorPrecio");
 
 let productosDisponibles = [];
 let todosLosProductos = [];
-let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+let carrito = [];
+try {
+    const carritoGuardado = localStorage.getItem("carrito");
+    carrito = carritoGuardado ? JSON.parse(carritoGuardado) : [];
+} catch (error) {
+    console.error("Error al parsear el carrito desde localStorage:", error);
+    carrito = []; // Inicia con un carrito vacío si hay un error
+}
 
 const filtros = {
     busqueda: '',
