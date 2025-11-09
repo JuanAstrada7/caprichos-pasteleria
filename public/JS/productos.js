@@ -15,7 +15,7 @@ async function obtenerProductos() {
             throw new Error(`Error al cargar productos: ${response.statusText}`);
         }
         const data = await response.json();
-        return data.productos;
+        return data.productos; // Siempre devuelve una nueva copia de los datos del servidor
     } catch (error) {
         console.error(error);
         mostrarMensaje('error', 'Error al cargar productos', 'No se pudieron obtener los productos desde el servidor. Intenta recargar la página.');

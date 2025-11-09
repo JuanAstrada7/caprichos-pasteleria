@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // State
     let allProducts = [];
+    let activeModalTrigger = null; // Para recordar qué elemento abrió el modal
 
     // API functions
     const api = {
@@ -33,12 +34,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Contraseña incorrecta');
             return response.json();
         },
-        saveProducts: async (products) => {
-            await fetch('/api/productos', {
+        saveProduct: async (formData) => {
+            const response = await fetch('/api/producto', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productos: products }),
+                body: formData, // FormData establece su propio Content-Type
             });
+            if (!response.ok) throw new Error('Error al guardar el producto');
+            return response.json();
+        },
+        deleteProduct: async (id) => {
+            const response = await fetch(`/api/producto/${id}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('Error al eliminar el producto');
+            return response.json();
         }
     };
 
@@ -150,8 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleDeleteProduct = async (id) => {
         if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-            allProducts = allProducts.filter(p => p.id !== id);
-            await saveProductsAndRender();
+            try {
+                const result = await api.deleteProduct(id);
+                allProducts = result.productos; // Actualizamos con la lista que devuelve el servidor
+                renderProducts();
+                mostrarMensaje('success', 'Producto eliminado', 'El producto y su imagen han sido eliminados.');
+            } catch (error) {
+                mostrarMensaje('error', 'Error al eliminar', error.message);
+            }
         }
     };
 
@@ -170,7 +185,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     logoutButton.addEventListener('click', showLogin);
 
-    addProductBtn.addEventListener('click', () => openProductModal());
+    addProductBtn.addEventListener('click', (e) => {
+        activeModalTrigger = e.currentTarget; // Guardamos el botón "Agregar Producto"
+        openProductModal();
+    });
 
     productList.addEventListener('click', (e) => {
         const target = e.target;
@@ -180,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const productId = Number(card.dataset.productId);
 
         if (target.classList.contains('edit-btn')) {
+            activeModalTrigger = target; // Guardamos el botón "Editar" específico
             const product = allProducts.find(p => p.id === productId);
             if (product) openProductModal(product);
         } else if (target.classList.contains('delete-btn')) {
@@ -190,50 +209,43 @@ document.addEventListener('DOMContentLoaded', () => {
     productForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const handleImageFile = (file) => {
-            return new Promise((resolve, reject) => {
-                if (!file) {
-                    resolve(null); // No hay archivo nuevo
-                    return;
-                }
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = (error) => reject(error);
-            });
-        };
-
         try {
+            const formData = new FormData();
+            const productId = productIdInput.value;
+            const isEditing = !!productId;
+
+            formData.append('id', isEditing ? productId : null);
+            formData.append('nombre', productNameInput.value);
+            formData.append('precio', productPriceInput.value);
+            formData.append('categoria', productCategoryInput.value);
+
             const imageFile = productImageInput.files[0];
-            const newImageDataUrl = await handleImageFile(imageFile);
-
-            const productId = productIdInput.value ? Number(productIdInput.value) : Date.now();
-            const isEditing = !!productIdInput.value;
-
-            let productData = {
-                id: productId,
-                nombre: productNameInput.value,
-                precio: Number(productPriceInput.value),
-                categoria: productCategoryInput.value,
-                imagen: newImageDataUrl, // Se asignará más adelante
-            };
-
-            if (isEditing) {
-                const index = allProducts.findIndex(p => p.id === productId);
-                if (index > -1) {
-                    productData.imagen = newImageDataUrl || allProducts[index].imagen; // Mantener imagen anterior si no se sube una nueva
-                    allProducts[index] = productData;
-                }
+            if (imageFile) {
+                formData.append('imagen', imageFile);
+            } else if (isEditing) {
+                // Si estamos editando y no se sube nueva imagen, enviamos la URL de la imagen anterior
+                const product = allProducts.find(p => p.id === Number(productId));
+                formData.append('imagenAnterior', product.imagen);
             } else {
-                if (!newImageDataUrl) throw new Error('Debes seleccionar una imagen para el nuevo producto.');
-                productData.imagen = newImageDataUrl;
-                allProducts.push(productData);
+                // Si es un producto nuevo, la imagen es obligatoria
+                throw new Error('Debes seleccionar una imagen para el nuevo producto.');
             }
 
-            await saveProductsAndRender();
+            const result = await api.saveProduct(formData);
+            allProducts = result.productos; // El servidor nos devuelve la lista actualizada
+            renderProducts();
             productModal.hide();
         } catch (error) {
             mostrarMensaje('error', 'Error al guardar', error.message);
+        }
+    });
+
+    // Listener para el evento de cierre del modal de Bootstrap
+    document.getElementById('product-modal').addEventListener('hidden.bs.modal', () => {
+        // Devuelve el foco al elemento que abrió el modal (ya sea "Agregar" o "Editar").
+        // Esto soluciona la advertencia de accesibilidad 'aria-hidden'.
+        if (activeModalTrigger) {
+            activeModalTrigger.focus();
         }
     });
 
