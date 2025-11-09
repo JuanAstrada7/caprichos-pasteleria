@@ -30,35 +30,56 @@
             <p id="cantidadProductos">0</p>
         </div>
     </header>
-    <aside class="sideBar">
-        <div class="buscador">
-            <p>Ingrese busqueda</p>
-            <input type="text" id="filtroInput">
+
+    <!-- Panel Off-canvas con los filtros -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFiltros" aria-labelledby="offcanvasFiltrosLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasFiltrosLabel">Filtros</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="filtros">
-            <p class="filtrosText">Categorías</p>
-            <ul id="filtroLista" class="listaMenu-aside">
-                <li class="asideBoton"><a href="#" data-categoria="todos los productos">Todos</a></li>
-                <li class="asideBoton"><a href="#" data-categoria="box">Box</a></li>
-                <li class="asideBoton"><a href="#" data-categoria="combos">Combos</a></li>
-                <li class="asideBoton"><a href="#" data-categoria="tortas">Tortas</a></li>
-            </ul>
+        <div class="offcanvas-body">
+            <!-- Aquí movemos todo el contenido del antiguo aside -->
+            <div class="buscador mb-4">
+                <p>Ingrese busqueda</p>
+                <input type="text" id="filtroInput" class="form-control">
+            </div>
+            <div class="filtros mb-4">
+                <p class="filtrosText">Categorías</p>
+                <ul id="filtroLista" class="listaMenu-aside">
+                    <li class="asideBoton"><a href="#" data-categoria="todos los productos" class="active">Todos</a></li>
+                    <li class="asideBoton"><a href="#" data-categoria="box">Box</a></li>
+                    <li class="asideBoton"><a href="#" data-categoria="combos">Combos</a></li>
+                    <li class="asideBoton"><a href="#" data-categoria="tortas">Tortas</a></li>
+                </ul>
+            </div>
+            <div class="filtros">
+                <p class="filtrosText">Ordenar por Precios</p>
+                <select id="filtroPorPrecio" class="form-select form-select-sm">
+                    <option value="default" selected>Por defecto</option>
+                    <option value="asc">Ascendente</option>
+                    <option value="desc">Descendente</option>
+                </select>
+            </div>
         </div>
-        <div class="filtros">
-            <p class="filtrosText">Ordenar por Precios</p>
-            <select id="filtroPorPrecio" class="form-select form-select-sm">
-                <option value="default" selected>Por defecto</option>
-                <option value="asc">Ascendente</option>
-                <option value="desc">Descendente</option>
-            </select>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- El contenido principal ahora ocupa todo el ancho -->
+            <main class="col-12 px-4">
+                <!-- Contenedor para el título y el botón de filtros -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+                    <h1 id="nuestrosProductos" class="mb-3 mb-md-0">Nuestros Productos</h1>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltros" aria-controls="offcanvasFiltros">
+                        ☰ Filtrar y Ordenar
+                    </button>
+                </div>
+                <div id="productos" class="divProducto"></div>
+            </main>
         </div>
-    </aside>
-    <div class="contenedor">
-        <h1 id="nuestrosProductos">Nuestros Productos</h1>
-        <main class="main">
-            <div id="productos" class="divProducto"></div>
-    
-    <div id= "modal" class="modalContainer">
+    </div>
+
+    <div id="modal" class="modalContainer">
         <h2 class="modalTitulo">Sus compras</h2>
         <div class="carrito" id="carritoConteiner"></div>
         <div class="carritoTotales" id="carritoTotal"></div>

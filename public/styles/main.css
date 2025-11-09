@@ -126,21 +126,22 @@ body {
     min-height: 500px;
     padding: 20px;
 
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: grid;    
+    /* Hacemos el grid más responsivo */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     justify-items: center;
 }
 
 .cardProducto {
     min-width: 260px;
-    min-height: 300px;
+    max-width: 300px; /* Añadimos un max-width para consistencia */
     background-color: rgb(216, 190, 157);
     margin: 10px;
     border-radius: 20px;
     box-shadow: 19px 14px 19px 2px rgba(0, 0, 0, 0.75);
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: flex-start; /* Alineamos el contenido hacia arriba */
     align-items: center;
     text-align: center;
     -webkit-border-radius: 20px;
@@ -148,6 +149,7 @@ body {
     -ms-border-radius: 20px;
     -o-border-radius: 20px;
 }
+.cardProducto:hover { transform: scale(1.02); transition: transform 0.2s ease-in-out; }
 
 .botonCompra {
     background-color: rgb(223, 171, 103);
@@ -167,31 +169,11 @@ body {
 
 /* --- Aside --- */
 
-.sideBar {
-    background-color: burlywood;
-    position: fixed;
-    top: 300px;
-    left: 50px;
-    min-width: 200px;
-    height: 50%;
-    margin-right: 100px;
-    border-radius: 19px 19px 19px 19px;
-    -webkit-border-radius: 19px 19px 19px 19px;
-    -moz-border-radius: 19px 19px 19px 19px;
-    -ms-border-radius: 19px 19px 19px 19px;
-    -o-border-radius: 19px 19px 19px 19px;
-    box-shadow: 19px 14px 19px 2px rgba(0, 0, 0, 0.75);
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
-    text-align: center;
+/* Estilo para el nuevo panel de filtros off-canvas */
+.offcanvas-body {
+    background-color: burlywood; /* Mantenemos el color de fondo que te gustaba */
 }
 
-.sideBar .sideBarBtn {
-    position: fixed;
-}
 
 .buscador p {
     font-size: 20px;
@@ -201,11 +183,6 @@ body {
 .filtrosText {
     font-size: 20px;
     font-weight: bold;
-}
-
-.sideBar .filtrosText {
-    padding: 5px;
-    margin-bottom: 20px;
 }
 
 .asideBoton:hover {
@@ -230,9 +207,12 @@ body {
 /* ---- cards ---- */
 
 .cardImg {
-    width: auto;
-    max-height: 100px;
-    border-radius: 5px;
+    width: 100%; /* La imagen ocupará todo el ancho de la tarjeta */
+    height: 200px; /* Le damos una altura fija para que todas las tarjetas se vean uniformes */
+    object-fit: cover; /* Esto asegura que la imagen cubra el espacio sin deformarse */
+    border-radius: 20px 20px 0 0; /* Redondeamos solo las esquinas superiores */
+    -webkit-border-radius: 20px 20px 0 0;
+    margin-bottom: 15px; /* Espacio entre la imagen y el texto */
 }
 
 /* --- footer --- */
@@ -361,9 +341,11 @@ body {
 
 .cardInfo {
     display: flex;
+    width: 100%;
+    padding: 0 15px 15px 15px; /* Añadimos padding para que el texto no toque los bordes */
     flex-direction: column;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
 }
 .cardCarritoBotones {
     display: flex;
