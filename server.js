@@ -16,6 +16,16 @@ if (!fs.existsSync(UPLOADS_DIR)){
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
+// --- MEJORA: Caché de productos en memoria ---
+let productsCache = [];
+try {
+    const data = fs.readFileSync(PRODUCTS_PATH, 'utf8');
+    productsCache = JSON.parse(data);
+} catch (error) {
+    console.error("Error al cargar productos.json, iniciando con un array vacío.", error);
+    productsCache = [];
+}
+
 // Configuración de Multer para guardar archivos
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -49,12 +59,8 @@ app.get('/favicon.ico', (req, res) => {
 
 // API routes
 app.get('/api/productos', (req, res) => {
-    fs.readFile(PRODUCTS_PATH, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error reading products file' });
-        }
-        res.json({ productos: JSON.parse(data) });
-    });
+    // Servir directamente desde la caché en memoria
+    res.json({ productos: productsCache });
 });
 
 // Nueva ruta para guardar/actualizar un solo producto con imagen
@@ -63,73 +69,60 @@ app.post('/api/producto', upload.single('imagen'), (req, res) => {
     // Los datos del formulario que no son archivos vienen en req.body
     const { id, nombre, precio, categoria, imagenAnterior } = req.body;
     const isEditing = id !== 'null' && id !== '';
+    
+    // La URL pública de la imagen
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : imagenAnterior;
 
-    // Leer los productos actuales
-    fs.readFile(PRODUCTS_PATH, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error reading products file' });
-        }
-        let productos = JSON.parse(data);
-        let newProductData;
+    if (isEditing) {
+        // Actualizar producto existente en la caché
+        const productId = Number(id);
+        productsCache = productsCache.map(p => p.id === productId ? { ...p, nombre, precio: Number(precio), categoria, imagen: imageUrl } : p);
+    } else {
+        // Crear nuevo producto en la caché
+        const newProductData = {
+            id: Date.now(), // ID único basado en el timestamp
+            nombre,
+            precio: Number(precio),
+            categoria,
+            imagen: imageUrl
+        };
+        productsCache.push(newProductData);
+    }
 
-        // La URL pública de la imagen
-        // Si se subió un nuevo archivo (req.file existe), usamos su ruta. Si no, mantenemos la imagen anterior.
-        const imageUrl = req.file ? `/uploads/${req.file.filename}` : imagenAnterior;
-
-        if (isEditing) {
-            // Actualizar producto existente
-            const productId = Number(id);
-            productos = productos.map(p => p.id === productId ? { ...p, nombre, precio: Number(precio), categoria, imagen: imageUrl } : p);
-        } else {
-            // Crear nuevo producto
-            newProductData = {
-                id: Date.now(), // ID único basado en el timestamp
-                nombre,
-                precio: Number(precio),
-                categoria,
-                imagen: imageUrl
-            };
-            productos.push(newProductData);
-        }
-        // Guardar la lista de productos actualizada
-        fs.writeFile(PRODUCTS_PATH, JSON.stringify(productos, null, 2), 'utf8', err => {
-            if (err) return res.status(500).json({ message: 'Error writing products file' });
-            res.json({ success: true, productos });
-        });
+    // Guardar la caché actualizada en el archivo
+    fs.writeFile(PRODUCTS_PATH, JSON.stringify(productsCache, null, 2), 'utf8', err => {
+        if (err) return res.status(500).json({ message: 'Error writing products file' });
+        // Devolver la lista actualizada desde la caché
+        res.json({ success: true, productos: productsCache });
     });
 });
 
 app.delete('/api/producto/:id', (req, res) => {
     const { id } = req.params;
     const productId = Number(id);
+    
+    const productToDelete = productsCache.find(p => p.id === productId);
 
-    fs.readFile(PRODUCTS_PATH, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error al leer el archivo de productos.' });
+    if (!productToDelete) {
+        return res.status(404).json({ message: 'Producto no encontrado.' });
+    }
+
+    // Eliminar la imagen del sistema de archivos si existe
+    if (productToDelete.imagen && productToDelete.imagen.startsWith('/uploads/')) {
+        const imageName = path.basename(productToDelete.imagen);
+        const imagePath = path.join(UPLOADS_DIR, imageName);
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
         }
+    }
 
-        let productos = JSON.parse(data);
-        const productToDelete = productos.find(p => p.id === productId);
+    // Filtrar el producto de la caché
+    productsCache = productsCache.filter(p => p.id !== productId);
 
-        if (!productToDelete) {
-            return res.status(404).json({ message: 'Producto no encontrado.' });
-        }
-
-        // Eliminar la imagen del sistema de archivos
-        if (productToDelete.imagen && productToDelete.imagen.startsWith('/uploads/')) {
-            const imageName = path.basename(productToDelete.imagen);
-            const imagePath = path.join(UPLOADS_DIR, imageName);
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath); // Usamos sync aquí por simplicidad en el flujo
-            }
-        }
-
-        // Filtrar el producto y guardar el nuevo array
-        const newProducts = productos.filter(p => p.id !== productId);
-        fs.writeFile(PRODUCTS_PATH, JSON.stringify(newProducts, null, 2), 'utf8', (err) => {
-            if (err) return res.status(500).json({ message: 'Error al escribir en el archivo de productos.' });
-            res.json({ success: true, productos: newProducts });
-        });
+    // Guardar la caché actualizada en el archivo
+    fs.writeFile(PRODUCTS_PATH, JSON.stringify(productsCache, null, 2), 'utf8', (err) => {
+        if (err) return res.status(500).json({ message: 'Error al escribir en el archivo de productos.' });
+        res.json({ success: true, productos: productsCache });
     });
 });
 
