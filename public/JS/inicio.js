@@ -166,6 +166,11 @@ const dibujarCarrito = () => {
                         </button>
                     </div>
                     <p class="cardPrecio">Precio Total: $${precioTotal}</p>
+                    <button class="cardCarritoEliminar" id="botonEliminar${id}" title="Eliminar producto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                        </svg>
+                    </button>
                 </div>
             `;
             divCarrito.append(cardCarrito);
@@ -173,8 +178,11 @@ const dibujarCarrito = () => {
             const btnSumar = document.getElementById(`botonSumar${id}`);
             const btnRestar = document.getElementById(`botonRestar${id}`);
 
+            const btnEliminar = document.getElementById(`botonEliminar${id}`);
+
             btnSumar.addEventListener("click", () => sumarProducto(id));
             btnRestar.addEventListener("click", () => restarProducto(id));
+            btnEliminar.addEventListener("click", () => eliminarProductoDelCarrito(id));
         });
         dibujarCarritoTotales();
     } catch (error) {
@@ -195,6 +203,7 @@ const dibujarCarritoTotales = () => {
             totales.innerHTML = `
                 <h4 class="totalTexto">Total a pagar: $ ${calculaTotales().totalPagar}</h4>
                 <button class="hacerCompra" id="finalizarCompraBtn">FINALIZAR PEDIDO</button>
+                <button class="vaciarCarrito" id="vaciarCarritoBtn">Vaciar Carrito</button>
             `;
 
             carritoTotales.append(totales);
@@ -257,6 +266,51 @@ const restarProducto = (id) => {
             "Intenta nuevamente"
         );
     }
+};
+
+const eliminarProductoDelCarrito = (id) => {
+    try {
+        const indexCarrito = carrito.findIndex((producto) => producto.id === id);
+        if (indexCarrito === -1) return;
+
+        carrito.splice(indexCarrito, 1);
+
+        localStorage.setItem("carrito", JSON.stringify(carrito));
+        dibujarCarrito();
+    } catch (error) {
+        mostrarMensaje(
+            "error",
+            "Error al eliminar producto",
+            "Intenta nuevamente"
+        );
+    }
+};
+
+const vaciarCarrito = () => {
+    mostrarMensajeConConfirmacion(
+        '¿Estás seguro?',
+        'Se eliminarán todos los productos de tu carrito.',
+        'warning',
+        'Sí, vaciar carrito'
+    ).then((result) => {
+        if (result.isConfirmed) {
+            carrito = [];
+            localStorage.setItem("carrito", JSON.stringify(carrito));
+            dibujarCarrito();
+            mostrarMensaje('success', '¡Carrito vacío!', 'Se han eliminado todos los productos.');
+        }
+    });
+};
+
+const mostrarMensajeConConfirmacion = (title, text, icon, confirmButtonText) => {
+    return Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        showCancelButton: true,
+        confirmButtonText: confirmButtonText,
+        cancelButtonText: 'Cancelar'
+    });
 };
 
 const handleCheckout = () => {
@@ -330,6 +384,8 @@ cerrarCarrito.addEventListener("click", () => {
 document.body.addEventListener('click', (e) => {
     if (e.target.id === 'finalizarCompraBtn') {
         handleCheckout();
+    } else if (e.target.id === 'vaciarCarritoBtn') {
+        vaciarCarrito();
     }
 });
 
