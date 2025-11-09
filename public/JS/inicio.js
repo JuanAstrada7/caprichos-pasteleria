@@ -16,6 +16,7 @@ const filtrarPrecio = document.getElementById("filtroPorPrecio");
 let productosDisponibles = [];
 let todosLosProductos = [];
 let carrito = JSON.parse(sessionStorage.getItem("carrito")) || [];
+let checkoutModal; // Se inicializará en DOMContentLoaded
 
 // Inicialización
 document.addEventListener("DOMContentLoaded", async () => {
@@ -24,6 +25,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         productosDisponibles = [...todosLosProductos];
 
         dibujarCardProducto(productosDisponibles);
+        // Inicializar el modal de Bootstrap después de que el DOM esté listo
+        checkoutModal = new bootstrap.Modal(document.getElementById('checkout-modal'));
+
+        // Mover la inicialización del formulario aquí para asegurar que el DOM está cargado
+        const checkoutForm = document.getElementById('checkout-form');
+        checkoutForm.addEventListener('submit', enviarPedidoWhatsApp);
+
         dibujarCarrito();
     } catch (error) {
         mostrarMensaje(
@@ -151,23 +159,11 @@ const dibujarCarritoTotales = () => {
             totales.className = "totales";
             totales.innerHTML = `
                 <h4 class="totalTexto">Total a pagar: $ ${calculaTotales().totalPagar}</h4>
-                <a href="#" class="hacerCompra" id="hacerCompra">COMPRAR</a>
+                <button class="hacerCompra" id="finalizarCompraBtn">FINALIZAR PEDIDO</button>
             `;
 
             carritoTotales.append(totales);
             cantidadCarrito.innerHTML = `${calculaTotales().totalCantidad}`;
-
-            const comprar = document.getElementById("hacerCompra");
-            comprar.addEventListener("click", () => {
-                mostrarMensaje(
-                    "success",
-                    "Compra realizada con éxito",
-                    "Gracias por tu compra"
-                );
-                carrito = [];
-                sessionStorage.setItem("carrito", JSON.stringify(carrito));
-                dibujarCarrito();
-            });
         } else {
             carritoTotales.innerHTML = `<h4>"Agrega productos para comprar"</h4>`;
             cantidadCarrito.innerHTML = `${calculaTotales().totalCantidad}`;
@@ -228,6 +224,56 @@ const restarProducto = (id) => {
     }
 };
 
+const handleCheckout = () => {
+    // Cierra el modal del carrito
+    modal.classList.remove("modalMostrar");
+    // Abre el modal con el formulario de datos del cliente
+    checkoutModal.show();
+};
+
+const enviarPedidoWhatsApp = (e) => {
+    e.preventDefault();
+    const customerName = document.getElementById('customer-name').value;
+    const customerAddress = document.getElementById('customer-address').value;
+
+    if (!customerName || !customerAddress) {
+        mostrarMensaje('error', 'Datos incompletos', 'Por favor, completa tu nombre y dirección.');
+        return;
+    }
+
+    // Construir el mensaje del pedido
+    let mensaje = `¡Hola Caprichos Pastelería! 👋 Quiero hacer un pedido:\n\n`;
+    mensaje += `*Cliente:* ${customerName}\n`;
+    mensaje += `*Dirección de envío:* ${customerAddress}\n\n`;
+    mensaje += `*Mi pedido es:*\n`;
+
+    carrito.forEach(producto => {
+        mensaje += `• ${producto.nombre} (x${producto.cantidad}) - $${producto.precioTotal}\n`;
+    });
+
+    mensaje += `\n*Total a pagar: $${calculaTotales().totalPagar}*`;
+
+    // Codificar el mensaje para la URL
+    const mensajeCodificado = encodeURIComponent(mensaje);
+    const numeroWhatsApp = '5493513018567'; // Reemplaza con tu número de WhatsApp
+    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${mensajeCodificado}`;
+
+    // Abrir WhatsApp en una nueva pestaña
+    window.open(urlWhatsApp, '_blank');
+
+    // Limpiar el carrito y la UI
+    checkoutModal.hide();
+    carrito = [];
+    sessionStorage.setItem("carrito", JSON.stringify(carrito));
+    dibujarCarrito();
+
+    mostrarMensaje(
+        "success",
+        "¡Pedido en camino!",
+        "Se abrió WhatsApp para que envíes tu pedido. ¡Gracias por tu compra!"
+    );
+};
+
 // Event Listeners
 abrirCarrito.addEventListener("click", () => {
     try {
@@ -250,6 +296,13 @@ cerrarCarrito.addEventListener("click", () => {
             "Error al cerrar carrito",
             "Intenta nuevamente"
         );
+    }
+});
+
+// Listener para el botón de finalizar compra y el formulario de checkout
+document.body.addEventListener('click', (e) => {
+    if (e.target.id === 'finalizarCompraBtn') {
+        handleCheckout();
     }
 });
 

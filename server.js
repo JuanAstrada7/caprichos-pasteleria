@@ -132,16 +132,6 @@ app.delete('/api/producto/:id', (req, res) => {
     });
 });
 
-app.post('/api/productos', (req, res) => {
-    const { productos: newProducts } = req.body;
-    fs.writeFile(PRODUCTS_PATH, JSON.stringify(newProducts, null, 2), 'utf8', err => {
-        if (err) {
-            return res.status(500).json({ message: 'Error writing products file' });
-        }
-        res.json({ message: 'Products updated successfully' });
-    });
-});
-
 // Admin login
 app.post('/api/login', (req, res) => {
     const { password } = req.body;
