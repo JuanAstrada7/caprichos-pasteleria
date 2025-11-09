@@ -86,22 +86,6 @@ body {
     font-size: 35px;
 }
 
-.headerMenu {
-    background-color: rgb(223, 171, 103);
-    border-radius: 8px;
-    width: 100%;
-    min-height: 50px;
-    margin-top: 25px;
-}
-
-.headerMenu .listaMenu {
-    width: 100%;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    align-items: center;
-}
-
 .header .botonCarrito {
     /* background-color: brown; */
     width: 100%;
@@ -111,17 +95,10 @@ body {
     flex-flow: row wrap;
     justify-content: center;
 }
-
 .header .bi {
     width: 2rem;
     height: 2rem;
 }
-
-
-.headerMenu .listaMenu li {
-    padding: 10px 20px;
-}
-
 /* --- Contenedor --- */
 .contenedor {
     width: 100%;
@@ -232,6 +209,21 @@ body {
 }
 
 .asideBoton:hover {
+    text-decoration: underline;
+}
+
+/* --- MEJORA: Estilos para filtros en el aside --- */
+.listaMenu-aside {
+    padding-left: 0;
+}
+
+.listaMenu-aside li a {
+    font-size: 18px;
+    color: #333;
+}
+
+.listaMenu-aside li a.active {
+    font-weight: bold;
     text-decoration: underline;
 }
 

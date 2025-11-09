@@ -16,6 +16,13 @@ const filtrarPrecio = document.getElementById("filtroPorPrecio");
 let productosDisponibles = [];
 let todosLosProductos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+// --- MEJORA: Estado centralizado para los filtros ---
+const filtros = {
+    busqueda: '',
+    categoria: 'todos los productos',
+    orden: 'default'
+};
 let checkoutModal; // Se inicializará en DOMContentLoaded
 
 // Inicialización
@@ -23,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         todosLosProductos = await obtenerProductos();
         productosDisponibles = [...todosLosProductos];
-
+        
         dibujarCardProducto(productosDisponibles);
         // Inicializar el modal de Bootstrap después de que el DOM esté listo
         checkoutModal = new bootstrap.Modal(document.getElementById('checkout-modal'));
@@ -41,6 +48,37 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
     }
 });
+
+// --- MEJORA: Función única para aplicar todos los filtros ---
+const aplicarFiltros = () => {
+    try {
+        // 1. Filtrar por búsqueda y categoría
+        let productosFiltrados = todosLosProductos.filter(producto => {
+            const coincideBusqueda = producto.nombre.toLowerCase().includes(filtros.busqueda);
+            const coincideCategoria = filtros.categoria === 'todos los productos' || producto.categoria.toLowerCase() === filtros.categoria;
+            return coincideBusqueda && coincideCategoria;
+        });
+
+        // 2. Ordenar
+        switch (filtros.orden) {
+            case 'asc':
+                productosFiltrados.sort((a, b) => a.precio - b.precio);
+                break;
+            case 'desc':
+                productosFiltrados.sort((a, b) => b.precio - a.precio);
+                break;
+            // 'default' no necesita hacer nada, mantiene el orden original
+        }
+
+        dibujarCardProducto(productosFiltrados);
+    } catch (error) {
+        mostrarMensaje(
+            "error",
+            "Error al aplicar filtros",
+            "Intenta nuevamente"
+        );
+    }
+};
 
 const dibujarCardProducto = (productos) => {
     try {
@@ -306,64 +344,27 @@ document.body.addEventListener('click', (e) => {
     }
 });
 
-filtroInput.addEventListener("keyup", (e) => {
-    try {
-        const searchText = e.target.value.toLowerCase();
-        if (searchText.trim() !== "") {
-            productosDisponibles = todosLosProductos.filter((producto) =>
-                producto.nombre.toLowerCase().includes(searchText)
-            );
-        } else {
-            productosDisponibles = [...todosLosProductos];
-        }
-        dibujarCardProducto(productosDisponibles);
-    } catch (error) {
-        mostrarMensaje(
-            "error",
-            "Error al filtrar productos",
-            "Intenta nuevamente"
-        );
-    }
+// --- MEJORA: Event Listeners refactorizados ---
+filtroInput.addEventListener("input", (e) => {
+    filtros.busqueda = e.target.value.toLowerCase().trim();
+    aplicarFiltros();
 });
 
 listaMenu.addEventListener("click", (e) => {
-    try {
-        filtroInput.value = "";
-        const filtroCategoria = e.target.innerHTML.toLowerCase();
+    e.preventDefault(); // Evita que el enlace '#' recargue la página
+    // Usamos dataset para obtener la categoría de forma más robusta
+    if (e.target.dataset.categoria) {
+        filtros.categoria = e.target.dataset.categoria.toLowerCase();
+        
+        // Opcional: Resaltar la categoría activa
+        document.querySelectorAll('#filtroLista a').forEach(a => a.classList.remove('active'));
+        e.target.classList.add('active');
 
-        if (filtroCategoria === "todos los productos") {
-            productosDisponibles = [...todosLosProductos];
-        } else {
-            productosDisponibles = todosLosProductos.filter((producto) =>
-                producto.categoria.toLowerCase() === filtroCategoria
-            );
-        }
-        dibujarCardProducto(productosDisponibles);
-    } catch (error) {
-        mostrarMensaje(
-            "error",
-            "Error al filtrar categoría",
-            "Intenta nuevamente"
-        );
+        aplicarFiltros();
     }
 });
 
-filtrarPrecio.addEventListener("click", (e) => {
-    try {
-        const orden = e.target.innerHTML;
-
-        if (orden === "Ascendente") {
-            productosDisponibles.sort((a, b) => a.precio - b.precio);
-        } else if (orden === "Descendente") {
-            productosDisponibles.sort((a, b) => b.precio - a.precio);
-        }
-
-        dibujarCardProducto(productosDisponibles);
-    } catch (error) {
-        mostrarMensaje(
-            "error",
-            "Error al ordenar productos",
-            "Intenta nuevamente"
-        );
-    }
+filtrarPrecio.addEventListener("change", (e) => {
+    filtros.orden = e.target.value;
+    aplicarFiltros();
 });
