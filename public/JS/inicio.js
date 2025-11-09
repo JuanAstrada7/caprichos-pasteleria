@@ -1,6 +1,5 @@
 import { obtenerProductos, mostrarMensaje } from './productos.js';
 
-// Elementos del DOM
 const divProductos = document.getElementById("productos");
 const divCarrito = document.getElementById("carritoConteiner");
 const carritoTotales = document.getElementById("carritoTotal");
@@ -12,30 +11,25 @@ const filtroInput = document.getElementById("filtroInput");
 const listaMenu = document.getElementById("filtroLista");
 const filtrarPrecio = document.getElementById("filtroPorPrecio");
 
-// Variables globales
 let productosDisponibles = [];
 let todosLosProductos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
-// --- MEJORA: Estado centralizado para los filtros ---
 const filtros = {
     busqueda: '',
     categoria: 'todos los productos',
     orden: 'default'
 };
-let checkoutModal; // Se inicializará en DOMContentLoaded
+let checkoutModal;
 
-// Inicialización
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         todosLosProductos = await obtenerProductos();
         productosDisponibles = [...todosLosProductos];
-        
+
         dibujarCardProducto(productosDisponibles);
-        // Inicializar el modal de Bootstrap después de que el DOM esté listo
         checkoutModal = new bootstrap.Modal(document.getElementById('checkout-modal'));
 
-        // Mover la inicialización del formulario aquí para asegurar que el DOM está cargado
         const checkoutForm = document.getElementById('checkout-form');
         checkoutForm.addEventListener('submit', enviarPedidoWhatsApp);
 
@@ -49,17 +43,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-// --- MEJORA: Función única para aplicar todos los filtros ---
 const aplicarFiltros = () => {
     try {
-        // 1. Filtrar por búsqueda y categoría
         let productosFiltrados = todosLosProductos.filter(producto => {
             const coincideBusqueda = producto.nombre.toLowerCase().includes(filtros.busqueda);
             const coincideCategoria = filtros.categoria === 'todos los productos' || producto.categoria.toLowerCase() === filtros.categoria;
             return coincideBusqueda && coincideCategoria;
         });
 
-        // 2. Ordenar
         switch (filtros.orden) {
             case 'asc':
                 productosFiltrados.sort((a, b) => a.precio - b.precio);
@@ -67,7 +58,6 @@ const aplicarFiltros = () => {
             case 'desc':
                 productosFiltrados.sort((a, b) => b.precio - a.precio);
                 break;
-            // 'default' no necesita hacer nada, mantiene el orden original
         }
 
         dibujarCardProducto(productosFiltrados);
@@ -263,9 +253,7 @@ const restarProducto = (id) => {
 };
 
 const handleCheckout = () => {
-    // Cierra el modal del carrito
     modal.classList.remove("modalMostrar");
-    // Abre el modal con el formulario de datos del cliente
     checkoutModal.show();
 };
 
@@ -279,7 +267,6 @@ const enviarPedidoWhatsApp = (e) => {
         return;
     }
 
-    // Construir el mensaje del pedido
     let mensaje = `¡Hola Caprichos Pastelería! 👋 Quiero hacer un pedido:\n\n`;
     mensaje += `*Cliente:* ${customerName}\n`;
     mensaje += `*Dirección de envío:* ${customerAddress}\n\n`;
@@ -291,15 +278,12 @@ const enviarPedidoWhatsApp = (e) => {
 
     mensaje += `\n*Total a pagar: $${calculaTotales().totalPagar}*`;
 
-    // Codificar el mensaje para la URL
     const mensajeCodificado = encodeURIComponent(mensaje);
-    const numeroWhatsApp = '5493513018567'; // Reemplaza con tu número de WhatsApp
+    const numeroWhatsApp = '5493513018567';
     const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${mensajeCodificado}`;
 
-    // Abrir WhatsApp en una nueva pestaña
     window.open(urlWhatsApp, '_blank');
 
-    // Limpiar el carrito y la UI
     checkoutModal.hide();
     carrito = [];
     localStorage.setItem("carrito", JSON.stringify(carrito));
@@ -312,7 +296,6 @@ const enviarPedidoWhatsApp = (e) => {
     );
 };
 
-// Event Listeners
 abrirCarrito.addEventListener("click", () => {
     try {
         modal.classList.add("modalMostrar");
@@ -337,26 +320,22 @@ cerrarCarrito.addEventListener("click", () => {
     }
 });
 
-// Listener para el botón de finalizar compra y el formulario de checkout
 document.body.addEventListener('click', (e) => {
     if (e.target.id === 'finalizarCompraBtn') {
         handleCheckout();
     }
 });
 
-// --- MEJORA: Event Listeners refactorizados ---
 filtroInput.addEventListener("input", (e) => {
     filtros.busqueda = e.target.value.toLowerCase().trim();
     aplicarFiltros();
 });
 
 listaMenu.addEventListener("click", (e) => {
-    e.preventDefault(); // Evita que el enlace '#' recargue la página
-    // Usamos dataset para obtener la categoría de forma más robusta
+    e.preventDefault();
     if (e.target.dataset.categoria) {
         filtros.categoria = e.target.dataset.categoria.toLowerCase();
-        
-        // Opcional: Resaltar la categoría activa
+
         document.querySelectorAll('#filtroLista a').forEach(a => a.classList.remove('active'));
         e.target.classList.add('active');
 

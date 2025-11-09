@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="./styles/main.css">
 </head>
+
 <body>
     <div id="login-container" class="container mt-5">
         <div class="row justify-content-center">
@@ -37,11 +39,9 @@
         <h2 class="mt-5">Gestionar Productos</h2>
         <button id="add-product-btn" class="btn btn-success mb-3">Agregar Producto</button>
         <div id="product-list" class="row">
-            <!-- Los productos se cargarán aquí -->
         </div>
     </div>
 
-    <!-- Modal para agregar/editar productos -->
     <div class="modal fade" id="product-modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -63,7 +63,8 @@
                         <div class="mb-3">
                             <label for="product-image" class="form-label">Imagen del Producto</label>
                             <input type="file" class="form-control" id="product-image" accept="image/*">
-                            <small id="image-hint" class="form-text text-muted">Sube un archivo o deja el campo vacío si no quieres cambiar la imagen actual al editar.</small>
+                            <small id="image-hint" class="form-text text-muted">Sube un archivo o deja el campo vacío si
+                                no quieres cambiar la imagen actual al editar.</small>
                         </div>
                         <div class="mb-3">
                             <label for="product-category" class="form-label">Categoría</label>
@@ -75,9 +76,10 @@
             </div>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="./JS/admin.js" type="module"></script>
 </body>
+
 </html>

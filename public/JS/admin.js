@@ -1,7 +1,6 @@
 import { obtenerProductos, mostrarMensaje } from './productos.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
     const loginContainer = document.getElementById('login-container');
     const adminPanel = document.getElementById('admin-panel');
     const loginForm = document.getElementById('login-form');
@@ -19,11 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const productCategoryInput = document.getElementById('product-category');
     const imageHint = document.getElementById('image-hint');
 
-    // State
     let allProducts = [];
-    let activeModalTrigger = null; // Para recordar qué elemento abrió el modal
+    let activeModalTrigger = null;
 
-    // API functions
     const api = {
         login: async (password) => {
             const response = await fetch('/api/login', {
@@ -37,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveProduct: async (formData) => {
             const response = await fetch('/api/producto', {
                 method: 'POST',
-                body: formData, // FormData establece su propio Content-Type
+                body: formData,
             });
             if (!response.ok) throw new Error('Error al guardar el producto');
             return response.json();
@@ -51,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Functions
     const showAdminPanel = () => {
         loginContainer.classList.add('d-none');
         adminPanel.classList.remove('d-none');
@@ -136,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
             productIdInput.value = product.id;
             productNameInput.value = product.nombre;
             productPriceInput.value = product.precio;
-            // No establecemos el valor para el input de archivo, solo mostramos la ayuda
             imageHint.classList.remove('d-none');
             productCategoryInput.value = product.categoria;
         } else {
@@ -161,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
             try {
                 const result = await api.deleteProduct(id);
-                allProducts = result.productos; // Actualizamos con la lista que devuelve el servidor
+                allProducts = result.productos;
                 renderProducts();
                 mostrarMensaje('success', 'Producto eliminado', 'El producto y su imagen han sido eliminados.');
             } catch (error) {
@@ -170,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Event Listeners
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
@@ -186,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutButton.addEventListener('click', showLogin);
 
     addProductBtn.addEventListener('click', (e) => {
-        activeModalTrigger = e.currentTarget; // Guardamos el botón "Agregar Producto"
+        activeModalTrigger = e.currentTarget;
         openProductModal();
     });
 
@@ -198,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const productId = Number(card.dataset.productId);
 
         if (target.classList.contains('edit-btn')) {
-            activeModalTrigger = target; // Guardamos el botón "Editar" específico
+            activeModalTrigger = target;
             const product = allProducts.find(p => p.id === productId);
             if (product) openProductModal(product);
         } else if (target.classList.contains('delete-btn')) {
@@ -223,16 +217,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (imageFile) {
                 formData.append('imagen', imageFile);
             } else if (isEditing) {
-                // Si estamos editando y no se sube nueva imagen, enviamos la URL de la imagen anterior
                 const product = allProducts.find(p => p.id === Number(productId));
                 formData.append('imagenAnterior', product.imagen);
             } else {
-                // Si es un producto nuevo, la imagen es obligatoria
                 throw new Error('Debes seleccionar una imagen para el nuevo producto.');
             }
 
             const result = await api.saveProduct(formData);
-            allProducts = result.productos; // El servidor nos devuelve la lista actualizada
+            allProducts = result.productos;
             renderProducts();
             productModal.hide();
         } catch (error) {
@@ -240,16 +232,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Listener para el evento de cierre del modal de Bootstrap
     document.getElementById('product-modal').addEventListener('hidden.bs.modal', () => {
-        // Devuelve el foco al elemento que abrió el modal (ya sea "Agregar" o "Editar").
-        // Esto soluciona la advertencia de accesibilidad 'aria-hidden'.
         if (activeModalTrigger) {
             activeModalTrigger.focus();
         }
     });
 
-    // Initial Check
     if (sessionStorage.getItem('isAdminLoggedIn')) {
         showAdminPanel();
     }
