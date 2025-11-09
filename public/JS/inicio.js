@@ -341,6 +341,7 @@ const enviarPedidoWhatsApp = (e) => {
     e.preventDefault();
     const customerName = document.getElementById('customer-name').value;
     const customerAddress = document.getElementById('customer-address').value;
+    const customerReference = document.getElementById('customer-reference').value;
 
     if (!customerName || !customerAddress) {
         mostrarMensaje('error', 'Datos incompletos', 'Por favor, completa tu nombre y dirección.');
@@ -350,6 +351,9 @@ const enviarPedidoWhatsApp = (e) => {
     let mensaje = `¡Hola Caprichos Pastelería! 👋 Quiero hacer un pedido:\n\n`;
     mensaje += `*Cliente:* ${customerName}\n`;
     mensaje += `*Dirección de envío:* ${customerAddress}\n\n`;
+    if (customerReference) {
+        mensaje += `*Referencia:* ${customerReference}\n\n`;
+    }
     mensaje += `*Mi pedido es:*\n`;
 
     carrito.forEach(producto => {
