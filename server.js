@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 const multer = require('multer');
 
 const app = express();
@@ -133,12 +134,19 @@ app.delete('/api/producto/:id', (req, res) => {
 });
 
 // Admin login
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { password } = req.body;
-    const adminPassword = process.env.ADMIN_PASSWORD; // No hardcoded fallback
+    // Ahora obtenemos el HASH desde las variables de entorno
+    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH; 
 
-    if (password === adminPassword) {
-        res.json({ success: true });
+    if (!adminPasswordHash) {
+        return res.status(500).json({ success: false, message: 'La configuración del servidor es incorrecta.' });
+    }
+
+    // Comparamos de forma segura la contraseña enviada con el hash almacenado
+    const isMatch = await bcrypt.compare(password, adminPasswordHash);
+    if (isMatch) {
+        res.json({ success: true }); // La contraseña es correcta
     } else {
         res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
     }

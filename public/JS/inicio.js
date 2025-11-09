@@ -15,7 +15,7 @@ const filtrarPrecio = document.getElementById("filtroPorPrecio");
 // Variables globales
 let productosDisponibles = [];
 let todosLosProductos = [];
-let carrito = JSON.parse(sessionStorage.getItem("carrito")) || [];
+let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let checkoutModal; // Se inicializará en DOMContentLoaded
 
 // Inicialización
@@ -88,7 +88,7 @@ const agregarProducto = (idProducto) => {
             productoEnCarrito.precioTotal = producto.precio * productoEnCarrito.cantidad;
         }
 
-        sessionStorage.setItem("carrito", JSON.stringify(carrito));
+        localStorage.setItem("carrito", JSON.stringify(carrito));
         dibujarCarrito();
 
         mostrarMensaje(
@@ -190,7 +190,7 @@ const sumarProducto = (id) => {
         carrito[indexCarrito].cantidad++;
         carrito[indexCarrito].precioTotal = productoOriginal.precio * carrito[indexCarrito].cantidad;
 
-        sessionStorage.setItem("carrito", JSON.stringify(carrito));
+        localStorage.setItem("carrito", JSON.stringify(carrito));
         dibujarCarrito();
     } catch (error) {
         mostrarMensaje(
@@ -213,7 +213,7 @@ const restarProducto = (id) => {
             carrito.splice(indexCarrito, 1);
         }
 
-        sessionStorage.setItem("carrito", JSON.stringify(carrito));
+        localStorage.setItem("carrito", JSON.stringify(carrito));
         dibujarCarrito();
     } catch (error) {
         mostrarMensaje(
@@ -264,7 +264,7 @@ const enviarPedidoWhatsApp = (e) => {
     // Limpiar el carrito y la UI
     checkoutModal.hide();
     carrito = [];
-    sessionStorage.setItem("carrito", JSON.stringify(carrito));
+    localStorage.setItem("carrito", JSON.stringify(carrito));
     dibujarCarrito();
 
     mostrarMensaje(
