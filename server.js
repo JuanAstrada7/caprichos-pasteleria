@@ -6,7 +6,6 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const sharp = require('sharp');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 const PRODUCTS_PATH = path.join(__dirname, 'data', 'productos.json');
@@ -25,7 +24,6 @@ try {
     productsCache = [];
 }
 
-// Usamos memoryStorage para procesar la imagen con sharp antes de guardarla
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(cors());
@@ -51,14 +49,12 @@ app.get('/api/productos', (req, res) => {
 app.post('/api/producto', upload.single('imagen'), async (req, res) => {
     const { id, nombre, precio, categoria, imagenAnterior } = req.body;
 
-    // --- Validación de entradas ---
     if (!nombre || !precio || !categoria) {
         return res.status(400).json({ message: 'Nombre, precio y categoría son campos requeridos.' });
     }
     if (isNaN(Number(precio)) || Number(precio) <= 0) {
         return res.status(400).json({ message: 'El precio debe ser un número positivo.' });
     }
-    // -----------------------------
 
     let imageUrl = imagenAnterior;
     const isEditing = id !== 'null' && id !== '';
@@ -70,13 +66,12 @@ app.post('/api/producto', upload.single('imagen'), async (req, res) => {
             const outputPath = path.join(UPLOADS_DIR, filename);
 
             await sharp(req.file.buffer)
-                .resize({ width: 800, withoutEnlargement: true }) // Redimensiona a 800px de ancho máximo
-                .webp({ quality: 80 }) // Convierte a WebP con 80% de calidad
+                .resize({ width: 800, withoutEnlargement: true })
+                .webp({ quality: 80 })
                 .toFile(outputPath);
 
             imageUrl = `/uploads/${filename}`;
 
-            // Si estamos editando y había una imagen anterior, la marcamos para borrar
             if (isEditing && imagenAnterior && imagenAnterior.startsWith('/uploads/')) {
                 oldImagePath = path.join(UPLOADS_DIR, path.basename(imagenAnterior));
             }
@@ -86,14 +81,11 @@ app.post('/api/producto', upload.single('imagen'), async (req, res) => {
         }
     }
 
-    if (isEditing) { // Editando un producto existente
+    if (isEditing) {
         const productId = Number(id);
-        // Buscamos el producto original para obtener la ruta de la imagen si no se pasó
         if (!imagenAnterior) {
             const originalProduct = productsCache.find(p => p.id === productId);
             if (originalProduct && originalProduct.imagen.startsWith('/uploads/')) {
-                // Esto es en caso de que el frontend no envíe imagenAnterior, nos aseguramos de tenerla
-                // Y si se subió un archivo nuevo, la marcamos para borrar
                 if (req.file) oldImagePath = path.join(UPLOADS_DIR, path.basename(originalProduct.imagen));
             }
         }
@@ -115,10 +107,8 @@ app.post('/api/producto', upload.single('imagen'), async (req, res) => {
 
     fs.writeFile(PRODUCTS_PATH, JSON.stringify(productsCache, null, 2), 'utf8', err => {
         if (err) return res.status(500).json({ message: 'Error writing products file' });
-        
-        // Si todo se guardó bien y hay una imagen vieja que borrar, la borramos
         if (oldImagePath && fs.existsSync(oldImagePath)) {
-            fs.unlink(oldImagePath, (unlinkErr) => { if(unlinkErr) console.error("Error al borrar imagen antigua:", unlinkErr); });
+            fs.unlink(oldImagePath, (unlinkErr) => { if (unlinkErr) console.error("Error al borrar imagen antigua:", unlinkErr); });
         }
         res.json({ success: true, productos: productsCache });
     });

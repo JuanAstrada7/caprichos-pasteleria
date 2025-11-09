@@ -91,6 +91,30 @@ const aplicarFiltros = () => {
 const dibujarCardProducto = (productos) => {
     try {
         divProductos.innerHTML = "";
+
+        if (filtros.busqueda === '') {
+            const cardEspecial = document.createElement("div");
+            cardEspecial.className = "cardProducto";
+            cardEspecial.innerHTML = `
+                <img class="cardImg" src="./assets/img/torta-personalizada.png" alt="Torta Personalizada">
+                <div class="cardInfo">
+                    <h5 class="nombreProducto">Torta Personalizada a tu Gusto</h5>
+                    <p class="cardPrecio">$ a cotizar</p>
+                    <button class="botonCompra" id="botonCotizar">Cotizar por WhatsApp</button>
+                </div>
+            `;
+            divProductos.append(cardEspecial);
+
+            const botonCotizar = document.getElementById(`botonCotizar`);
+            botonCotizar.addEventListener("click", () => {
+                const numeroWhatsApp = '5493513018567';
+                const mensaje = "¡Hola Caprichos! Quisiera cotizar una torta personalizada. ¿Me podrían ayudar?";
+                const mensajeCodificado = encodeURIComponent(mensaje);
+                const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${mensajeCodificado}`;
+                window.open(urlWhatsApp, '_blank');
+            });
+        }
+
         productos.forEach((producto) => {
             const { imagen, nombre, precio, id } = producto;
             const card = document.createElement("div");
