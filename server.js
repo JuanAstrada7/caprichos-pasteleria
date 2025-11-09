@@ -10,7 +10,8 @@ const PRODUCTS_PATH = path.join(__dirname, 'data', 'productos.json');
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+// Aumentamos el límite del payload para poder recibir las imágenes en base64
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Rutas HTML

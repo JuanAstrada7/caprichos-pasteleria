@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const productPriceInput = document.getElementById('product-price');
     const productImageInput = document.getElementById('product-image');
     const productCategoryInput = document.getElementById('product-category');
+    const imageHint = document.getElementById('image-hint');
 
     // State
     let allProducts = [];
@@ -126,11 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
             productIdInput.value = product.id;
             productNameInput.value = product.nombre;
             productPriceInput.value = product.precio;
-            productImageInput.value = product.imagen;
+            // No establecemos el valor para el input de archivo, solo mostramos la ayuda
+            imageHint.classList.remove('d-none');
             productCategoryInput.value = product.categoria;
         } else {
             modalTitle.textContent = 'Agregar Producto';
             productIdInput.value = '';
+            imageHint.classList.add('d-none');
         }
         productModal.show();
     };
@@ -186,23 +189,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     productForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const productData = {
-            id: productIdInput.value ? Number(productIdInput.value) : Date.now(),
-            nombre: productNameInput.value,
-            precio: Number(productPriceInput.value),
-            imagen: productImageInput.value,
-            categoria: productCategoryInput.value,
+
+        const handleImageFile = (file) => {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    resolve(null); // No hay archivo nuevo
+                    return;
+                }
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (error) => reject(error);
+            });
         };
 
-        if (productIdInput.value) {
-            const index = allProducts.findIndex(p => p.id === productData.id);
-            if (index > -1) allProducts[index] = productData;
-        } else {
-            allProducts.push(productData);
-        }
+        try {
+            const imageFile = productImageInput.files[0];
+            const newImageDataUrl = await handleImageFile(imageFile);
 
-        await saveProductsAndRender();
-        productModal.hide();
+            const productId = productIdInput.value ? Number(productIdInput.value) : Date.now();
+            const isEditing = !!productIdInput.value;
+
+            let productData = {
+                id: productId,
+                nombre: productNameInput.value,
+                precio: Number(productPriceInput.value),
+                categoria: productCategoryInput.value,
+                imagen: newImageDataUrl, // Se asignará más adelante
+            };
+
+            if (isEditing) {
+                const index = allProducts.findIndex(p => p.id === productId);
+                if (index > -1) {
+                    productData.imagen = newImageDataUrl || allProducts[index].imagen; // Mantener imagen anterior si no se sube una nueva
+                    allProducts[index] = productData;
+                }
+            } else {
+                if (!newImageDataUrl) throw new Error('Debes seleccionar una imagen para el nuevo producto.');
+                productData.imagen = newImageDataUrl;
+                allProducts.push(productData);
+            }
+
+            await saveProductsAndRender();
+            productModal.hide();
+        } catch (error) {
+            mostrarMensaje('error', 'Error al guardar', error.message);
+        }
     });
 
     // Initial Check
