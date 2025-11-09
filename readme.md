@@ -59,6 +59,8 @@ Juan Astrada
 
 ## 🔧 Instalación y Uso
 
+> **Nota**: Se recomienda usar Node.js v18 o una versión superior.
+
 1.  **Clonar el repositorio:**
     ```bash
     git clone https://github.com/JuanAstrada7/capricho-pasteleria.git

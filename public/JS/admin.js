@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (!response.ok) {
                 if (response.status === 401) {
-                    window.location.href = '/admin'; // Redirige al login si la sesión expiró
+                    window.location.href = '/admin';
                 }
                 throw new Error('Error al guardar el producto');
             }
