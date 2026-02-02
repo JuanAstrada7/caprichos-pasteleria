@@ -117,6 +117,27 @@
         </div>
     </div>
 
+    <!-- Modal de Detalles del Producto -->
+    <div class="modal fade" id="detalleProductoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalleTitulo"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img id="detalleImagen" src="" alt="" class="img-fluid rounded mb-3" style="width: 100%; max-height: 300px; object-fit: cover;">
+                    <p id="detalleDescripcion" class="mb-3"></p>
+                    <h4 id="detallePrecio" class="text-end"></h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success" id="detalleBotonAgregar">Agregar al Carrito</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <a href="https://api.whatsapp.com/send?phone=5493513018567" class="whatsapp-flotante" target="_blank"
         title="Consultas por WhatsApp">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-whatsapp"

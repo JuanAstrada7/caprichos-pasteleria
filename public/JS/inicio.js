@@ -42,6 +42,7 @@ const filtros = {
     orden: 'default'
 };
 let checkoutModal;
+let detalleModal;
 
 document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -50,6 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         dibujarCardProducto(productosDisponibles);
         checkoutModal = new bootstrap.Modal(document.getElementById('checkout-modal'));
+        detalleModal = new bootstrap.Modal(document.getElementById('detalleProductoModal'));
 
         const checkoutForm = document.getElementById('checkout-form');
         checkoutForm.addEventListener('submit', enviarPedidoWhatsApp);
@@ -119,18 +121,49 @@ const dibujarCardProducto = (productos) => {
         }
 
         productos.forEach((producto) => {
-            const { imagen, nombre, precio, id } = producto;
+            const { imagen, nombre, precio, id, mostrarPrecio } = producto;
+            
+            // Lógica para mostrar precio o texto alternativo
+            const precioDisplay = (mostrarPrecio !== false) ? `$${precio}` : "Consultar";
+            
             const card = document.createElement("div");
             card.className = "cardProducto";
             card.innerHTML = `
-                <img class="cardImg" src="${imagen}" alt="${nombre}">
+                <img class="cardImg" src="${imagen}" alt="${nombre}" style="cursor: pointer;">
                 <div class="cardInfo">
                     <h5 class="nombreProducto">${nombre}</h5>
-                    <p class="cardPrecio">$${precio}</p>
-                    <button class="botonCompra" id="botonComprar${id}">Agregar</button>
+                    <p class="cardPrecio">${precioDisplay}</p>
+                    <div class="d-flex gap-2 w-100 justify-content-center">
+                        <button class="btn btn-outline-primary btn-sm rounded-pill" id="botonDetalle${id}">Ver detalles</button>
+                        <button class="botonCompra" id="botonComprar${id}">Agregar</button>
+                    </div>
                 </div>
             `;
             divProductos.append(card);
+
+            // Evento para abrir modal de detalles (click en imagen o botón)
+            const abrirDetalle = () => {
+                document.getElementById('detalleTitulo').textContent = nombre;
+                document.getElementById('detalleImagen').src = imagen;
+                document.getElementById('detalleDescripcion').textContent = producto.descripcion || "Sin descripción detallada.";
+                document.getElementById('detallePrecio').textContent = (mostrarPrecio !== false) ? `$${precio}` : "Precio a convenir";
+                
+                // Configurar el botón de agregar dentro del modal
+                const btnAgregarModal = document.getElementById('detalleBotonAgregar');
+                // Clonamos el botón para eliminar event listeners anteriores
+                const nuevoBtn = btnAgregarModal.cloneNode(true);
+                btnAgregarModal.parentNode.replaceChild(nuevoBtn, btnAgregarModal);
+                
+                nuevoBtn.addEventListener('click', () => {
+                    agregarProducto(id);
+                    detalleModal.hide();
+                });
+
+                detalleModal.show();
+            };
+
+            card.querySelector('.cardImg').addEventListener('click', abrirDetalle);
+            document.getElementById(`botonDetalle${id}`).addEventListener('click', abrirDetalle);
 
             const botonComprar = document.getElementById(`botonComprar${id}`);
             botonComprar.addEventListener("click", () => agregarProducto(id));

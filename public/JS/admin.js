@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const productPriceInput = document.getElementById('product-price');
     const productImageInput = document.getElementById('product-image');
     const productCategoryInput = document.getElementById('product-category');
+    const productDescriptionInput = document.getElementById('product-description');
+    const productShowPriceInput = document.getElementById('product-show-price');
     const imageHint = document.getElementById('image-hint');
 
     let allProducts = [];
@@ -146,10 +148,14 @@ document.addEventListener('DOMContentLoaded', () => {
             productPriceInput.value = product.precio;
             imageHint.classList.remove('d-none');
             productCategoryInput.value = product.categoria;
+            productDescriptionInput.value = product.descripcion || '';
+            productShowPriceInput.checked = product.mostrarPrecio !== false; // Por defecto true si no existe
         } else {
             modalTitle.textContent = 'Agregar Producto';
             productIdInput.value = '';
             imageHint.classList.add('d-none');
+            productDescriptionInput.value = '';
+            productShowPriceInput.checked = true;
         }
         productModal.show();
     };
@@ -242,6 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('nombre', productNameInput.value);
             formData.append('precio', productPriceInput.value);
             formData.append('categoria', productCategoryInput.value);
+            formData.append('descripcion', productDescriptionInput.value);
+            formData.append('mostrarPrecio', productShowPriceInput.checked);
 
             const imageFile = productImageInput.files[0];
             if (imageFile) {

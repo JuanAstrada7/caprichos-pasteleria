@@ -506,3 +506,7 @@ body {
     border-color: var(--color-acento);
     color: white;
 }
+
+#detallePrecio {
+    color: var(--color-acento);
+}

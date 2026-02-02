@@ -65,7 +65,7 @@ app.get('/api/productos', (req, res) => {
 });
 
 app.post('/api/producto', requireAdmin, upload.single('imagen'), async (req, res) => {
-    const { id, nombre, precio, categoria, imagenAnterior } = req.body;
+    const { id, nombre, precio, categoria, imagenAnterior, descripcion, mostrarPrecio } = req.body;
 
     if (!nombre || !precio || !categoria) {
         return res.status(400).json({ message: 'Nombre, precio y categoría son campos requeridos.' });
@@ -108,14 +108,24 @@ app.post('/api/producto', requireAdmin, upload.single('imagen'), async (req, res
             }
         }
 
-        productsCache = productsCache.map(p => p.id === productId ? { ...p, nombre, precio: Number(precio), categoria, imagen: imageUrl } : p);
+        productsCache = productsCache.map(p => p.id === productId ? { 
+            ...p, 
+            nombre, 
+            precio: Number(precio), 
+            categoria, 
+            imagen: imageUrl,
+            descripcion: descripcion || '',
+            mostrarPrecio: mostrarPrecio === 'true'
+        } : p);
     } else {
         const newProductData = {
             id: crypto.randomUUID(),
             nombre,
             precio: Number(precio),
             categoria,
-            imagen: imageUrl
+            imagen: imageUrl,
+            descripcion: descripcion || '',
+            mostrarPrecio: mostrarPrecio === 'true'
         };
         if (!newProductData.imagen) {
             return res.status(400).json({ message: 'Se requiere una imagen para crear un nuevo producto.' });
