@@ -223,14 +223,18 @@ const dibujarCarrito = () => {
     try {
         divCarrito.innerHTML = "";
         carrito.forEach((producto) => {
-            const { imagen, nombre, precio, id, cantidad, precioTotal } = producto;
+            const { imagen, nombre, precio, id, cantidad, precioTotal, mostrarPrecio } = producto;
+            
+            const precioUnitarioTexto = (mostrarPrecio !== false) ? `$${precio}` : "Consultar";
+            const precioTotalTexto = (mostrarPrecio !== false) ? `$${precioTotal}` : "Consultar";
+
             const cardCarrito = document.createElement("div");
             cardCarrito.className = "cardCarrito";
             cardCarrito.innerHTML = `
                 <img class="cardImg" src="${imagen}" alt="${nombre}">
                 <div class="cardInfo">
                     <h5 class="nombreProducto">${nombre}</h5>
-                    <p class="cardPrecio">Precio unitario: $${precio}</p>
+                    <p class="cardPrecio">Precio unitario: ${precioUnitarioTexto}</p>
                     <div class="cardCarritoBotones">
                         <button class="cardCarritoSumar" id="botonSumar${id}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
@@ -244,7 +248,7 @@ const dibujarCarrito = () => {
                             </svg>
                         </button>
                     </div>
-                    <p class="cardPrecio">Precio Total: $${precioTotal}</p>
+                    <p class="cardPrecio">Precio Total: ${precioTotalTexto}</p>
                     <button class="cardCarritoEliminar" id="botonEliminar${id}" title="Eliminar producto">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                             <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
@@ -277,10 +281,14 @@ const dibujarCarritoTotales = () => {
     try {
         if (carrito.length > 0) {
             carritoTotales.innerHTML = "";
+            
+            const tienePreciosOcultos = carrito.some(p => p.mostrarPrecio === false);
+            const totalTexto = tienePreciosOcultos ? "A cotizar" : `$ ${calculaTotales().totalPagar}`;
+
             const totales = document.createElement("div");
             totales.className = "totales";
             totales.innerHTML = `
-                <h4 class="totalTexto">Total a pagar: $ ${calculaTotales().totalPagar}</h4>
+                <h4 class="totalTexto">Total a pagar: ${totalTexto}</h4>
                 <button class="hacerCompra" id="finalizarCompraBtn">FINALIZAR PEDIDO</button>
                 <button class="vaciarCarrito" id="vaciarCarritoBtn">Vaciar Carrito</button>
             `;
@@ -421,10 +429,14 @@ const enviarPedidoWhatsApp = (e) => {
     mensaje += `*Mi pedido es:*\n`;
 
     carrito.forEach(producto => {
-        mensaje += `• ${producto.nombre} (x${producto.cantidad}) - $${producto.precioTotal}\n`;
+        const precioTexto = (producto.mostrarPrecio !== false) ? `$${producto.precioTotal}` : "Consultar";
+        mensaje += `• ${producto.nombre} (x${producto.cantidad}) - ${precioTexto}\n`;
     });
 
-    mensaje += `\n*Total a pagar: $${calculaTotales().totalPagar}*`;
+    const tienePreciosOcultos = carrito.some(p => p.mostrarPrecio === false);
+    const totalTexto = tienePreciosOcultos ? "A cotizar" : `$${calculaTotales().totalPagar}`;
+
+    mensaje += `\n*Total a pagar: ${totalTexto}*`;
 
     const mensajeCodificado = encodeURIComponent(mensaje);
     const numeroWhatsApp = '5493513018567';
