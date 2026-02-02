@@ -493,3 +493,16 @@ body {
 .whatsapp-flotante:hover {
     transform: scale(1.1);
 }
+
+.btn-outline-primary {
+    color: var(--color-acento);
+    border-color: var(--color-acento);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: var(--color-acento);
+    border-color: var(--color-acento);
+    color: white;
+}

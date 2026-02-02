@@ -10,6 +10,9 @@ const cerrarCarrito = document.getElementById("cerrarModal");
 const filtroInput = document.getElementById("filtroInput");
 const listaMenu = document.getElementById("filtroLista");
 const filtrarPrecio = document.getElementById("filtroPorPrecio");
+const btnLimpiar = document.getElementById("btnLimpiarFiltros");
+const logo = document.getElementById("logo");
+const tituloPagina = document.getElementById("tituloPagina");
 
 let productosDisponibles = [];
 let todosLosProductos = [];
@@ -452,4 +455,35 @@ listaMenu.addEventListener("click", (e) => {
 filtrarPrecio.addEventListener("change", (e) => {
     filtros.orden = e.target.value;
     aplicarFiltros();
+});
+
+const resetearFiltros = () => {
+    filtros.busqueda = '';
+    filtros.categoria = 'todos los productos';
+    filtros.orden = 'default';
+
+    if (filtroInput) filtroInput.value = '';
+    if (filtrarPrecio) filtrarPrecio.value = 'default';
+
+    if (listaMenu) {
+        listaMenu.querySelectorAll('a').forEach(a => {
+            a.classList.remove('active');
+            if (a.dataset.categoria && a.dataset.categoria.toLowerCase() === 'todos los productos') {
+                a.classList.add('active');
+            }
+        });
+    }
+
+    aplicarFiltros();
+};
+
+if (btnLimpiar) btnLimpiar.addEventListener("click", resetearFiltros);
+
+[logo, tituloPagina].forEach(elemento => {
+    if (elemento) {
+        elemento.addEventListener("click", (e) => {
+            e.preventDefault();
+            resetearFiltros();
+        });
+    }
 });

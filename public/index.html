@@ -19,8 +19,8 @@
     <header class="header">
         <section class="headerLogo">
             <a href="#nuestrosProductos"><img src="./assets/img/images.png" alt="Logo de la tienda"
-                    class="imagenLogo"></a>
-            <h2 class="nombreTienda">Caprichos Pasteleria</h2>
+                    class="imagenLogo" id="logo"></a>
+            <h2 class="nombreTienda" id="tituloPagina">Caprichos Pasteleria</h2>
         </section>
         <div class="botonCarrito" id="botonCarrito">
             <a id="abrirModal" href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -68,10 +68,13 @@
             <main class="col-12 px-4">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
                     <h1 id="nuestrosProductos" class="mb-3 mb-md-0">Nuestros Productos</h1>
-                    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasFiltros" aria-controls="offcanvasFiltros">
-                        ☰ Filtrar y Ordenar
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button id="btnLimpiarFiltros" class="btn btn-outline-primary">Limpiar Filtros</button>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasFiltros" aria-controls="offcanvasFiltros">
+                            ☰ Filtrar y Ordenar
+                        </button>
+                    </div>
                 </div>
                 <div id="productos" class="divProducto"></div>
             </main>
